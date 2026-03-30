@@ -1,0 +1,1575 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="theme-color" content="#4F46E5">
+    <title>AI翻译助手</title>
+    <style>
+/* ===== 基础样式 ===== */
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+:root {
+    --primary: #4F46E5;
+    --primary-dark: #4338CA;
+    --secondary: #10B981;
+    --danger: #EF4444;
+    --bg: #F3F4F6;
+    --card: #FFFFFF;
+    --text: #1F2937;
+    --text-light: #6B7280;
+    --border: #E5E7EB;
+    --shadow: 0 2px 8px rgba(0,0,0,0.1);
+    --radius: 12px;
+    --radius-sm: 8px;
+    --sidebar-width: 240px;
+    --bottom-nav-height: 70px;
+    --header-height: 60px;
+}
+
+body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    line-height: 1.6;
+    min-height: 100vh;
+    padding-bottom: calc(var(--bottom-nav-height) + 70px);
+}
+
+/* ===== 安装提示 ===== */
+.install-banner {
+    position: fixed; top: 0; left: 0; right: 0;
+    background: var(--primary); color: white;
+    padding: 12px 16px;
+    display: flex; align-items: center; justify-content: center; gap: 12px;
+    z-index: 1000; font-size: 14px;
+}
+.install-banner.hidden { display: none; }
+.install-banner button { background: white; color: var(--primary); border: none; padding: 6px 16px; border-radius: 20px; font-weight: 600; cursor: pointer; }
+.install-banner #dismiss-install { background: transparent; color: white; padding: 4px 8px; font-size: 18px; }
+
+/* ===== 桌面端侧边栏 ===== */
+.sidebar {
+    display: none; position: fixed; left: 0; top: 0; bottom: 0;
+    width: var(--sidebar-width); background: var(--card);
+    box-shadow: var(--shadow); z-index: 200; flex-direction: column;
+}
+.sidebar-header { padding: 20px; border-bottom: 1px solid var(--border); }
+.sidebar-header h1 { font-size: 20px; font-weight: 700; }
+.sidebar-nav { flex: 1; padding: 16px 12px; display: flex; flex-direction: column; gap: 4px; }
+.nav-item {
+    display: flex; align-items: center; gap: 12px;
+    padding: 12px 16px; border: none; background: transparent;
+    border-radius: var(--radius-sm); cursor: pointer; transition: all 0.2s;
+    color: var(--text); font-size: 15px; width: 100%;
+}
+.nav-item:hover { background: var(--bg); }
+.nav-item.active { background: var(--primary); color: white; }
+.nav-icon { font-size: 20px; width: 24px; text-align: center; }
+.nav-label { font-weight: 500; }
+.sidebar-footer { padding: 16px 12px; border-top: 1px solid var(--border); }
+
+/* ===== 移动端头部 ===== */
+.header {
+    background: var(--card); padding: 16px 20px;
+    display: flex; justify-content: space-between; align-items: center;
+    box-shadow: var(--shadow); position: sticky; top: 0; z-index: 100;
+    height: var(--header-height);
+}
+.header h1 { font-size: 18px; font-weight: 700; }
+.mobile-only { display: flex; }
+.desktop-only { display: none; }
+
+/* ===== 按钮 ===== */
+.icon-btn { background: none; border: none; font-size: 20px; cursor: pointer; padding: 8px; border-radius: var(--radius-sm); transition: background 0.2s; }
+.icon-btn:hover { background: var(--bg); }
+.primary-btn {
+    width: 100%; background: var(--primary); color: white; border: none;
+    padding: 14px 24px; border-radius: var(--radius); font-size: 16px; font-weight: 600;
+    cursor: pointer; display: flex; align-items: center; justify-content: center;
+    gap: 8px; transition: background 0.2s;
+}
+.primary-btn:hover { background: var(--primary-dark); }
+.primary-btn:disabled { background: var(--text-light); cursor: not-allowed; }
+.secondary-btn {
+    width: 100%; background: var(--card); color: var(--primary);
+    border: 2px solid var(--primary); padding: 12px 24px;
+    border-radius: var(--radius); font-size: 16px; font-weight: 600;
+    cursor: pointer; transition: all 0.2s;
+}
+.secondary-btn:hover { background: var(--primary); color: white; }
+.text-btn { background: none; border: none; color: var(--primary); font-size: 14px; cursor: pointer; padding: 4px 8px; }
+.text-btn:hover { text-decoration: underline; }
+
+/* ===== 主内容区 ===== */
+.main-content { padding: 16px; max-width: 600px; margin: 0 auto; }
+
+/* ===== 模式切换标签 ===== */
+.mode-tabs { display: flex; gap: 8px; margin-bottom: 16px; background: var(--card); padding: 4px; border-radius: var(--radius); box-shadow: var(--shadow); }
+.mode-tab { flex: 1; padding: 12px; border: none; background: transparent; border-radius: var(--radius-sm); font-size: 14px; font-weight: 500; cursor: pointer; transition: all 0.2s; }
+.mode-tab.active { background: var(--primary); color: white; }
+.mode-content { display: none; }
+.mode-content.active { display: block; }
+
+/* ===== 语言选择器 ===== */
+.language-selector { display: flex; align-items: center; gap: 12px; margin-bottom: 16px; background: var(--card); padding: 12px; border-radius: var(--radius); box-shadow: var(--shadow); }
+.language-selector select { flex: 1; padding: 10px; border: 1px solid var(--border); border-radius: var(--radius-sm); font-size: 14px; background: white; }
+.swap-btn { background: var(--bg); border: none; width: 36px; height: 36px; border-radius: 50%; cursor: pointer; font-size: 16px; transition: transform 0.3s; flex-shrink: 0; }
+.swap-btn:hover { transform: rotate(180deg); }
+
+/* ===== 输入区域 ===== */
+.input-section { background: var(--card); padding: 16px; border-radius: var(--radius); box-shadow: var(--shadow); margin-bottom: 12px; }
+.input-section textarea { width: 100%; border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 12px; font-size: 16px; resize: vertical; min-height: 100px; font-family: inherit; }
+.input-section textarea:focus { outline: none; border-color: var(--primary); }
+.input-actions { display: flex; justify-content: space-between; align-items: center; margin-top: 8px; }
+.char-count { font-size: 12px; color: var(--text-light); }
+
+/* ===== 输出区域 ===== */
+.output-section { background: var(--card); padding: 16px; border-radius: var(--radius); box-shadow: var(--shadow); margin-top: 16px; }
+.output-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
+.output-label { font-weight: 600; color: var(--text-light); font-size: 14px; }
+.output-actions { display: flex; gap: 4px; }
+.output-text { min-height: 80px; padding: 12px; background: var(--bg); border-radius: var(--radius-sm); font-size: 16px; line-height: 1.8; white-space: pre-wrap; word-break: break-word; }
+.output-text:empty::before { content: '翻译结果将显示在这里...'; color: var(--text-light); }
+.output-text.streaming::after { content: '|'; animation: blink 1s infinite; }
+@keyframes blink { 0%,50%{opacity:1} 51%,100%{opacity:0} }
+.tts-controls { margin-top: 12px; display: flex; align-items: center; gap: 12px; }
+.tts-controls label { font-size: 14px; color: var(--text-light); }
+.tts-controls input[type="range"] { flex: 1; }
+
+/* ===== 语音模式 ===== */
+.voice-status { text-align: center; padding: 24px; background: var(--card); border-radius: var(--radius); box-shadow: var(--shadow); margin-bottom: 16px; }
+.voice-indicator { width: 48px; height: 48px; border-radius: 50%; background: var(--border); margin: 0 auto 12px; transition: all 0.3s; }
+.voice-indicator.active { background: var(--danger); animation: voicePulse 0.8s infinite; }
+@keyframes voicePulse { 0%,100%{transform:scale(1);opacity:1} 50%{transform:scale(1.2);opacity:0.7} }
+.voice-lang-selector { display: flex; align-items: center; gap: 12px; margin-bottom: 20px; background: var(--card); padding: 16px; border-radius: var(--radius); box-shadow: var(--shadow); }
+.lang-option { flex: 1; }
+.lang-option label { display: block; font-size: 12px; color: var(--text-light); margin-bottom: 6px; font-weight: 500; }
+.lang-option select { width: 100%; padding: 8px; border: 1px solid var(--border); border-radius: var(--radius-sm); font-size: 14px; }
+.lang-arrow { font-size: 20px; color: var(--text-light); flex-shrink: 0; }
+.voice-record-btn {
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    gap: 8px; width: 100%; padding: 32px; border: 3px solid var(--primary);
+    border-radius: var(--radius); background: var(--card); cursor: pointer;
+    transition: all 0.2s; box-shadow: var(--shadow); margin-bottom: 16px;
+    -webkit-user-select: none; user-select: none;
+}
+.voice-record-btn:active, .voice-record-btn.recording { background: var(--primary); color: white; transform: scale(0.98); }
+.mic-icon { font-size: 36px; }
+.record-text { font-size: 16px; font-weight: 600; }
+.voice-record-btn.recording .mic-icon { animation: micPulse 0.6s infinite; }
+@keyframes micPulse { 0%,100%{opacity:1} 50%{opacity:0.5} }
+
+/* ASR 引擎选择栏 */
+.asr-engine-bar { display:flex; align-items:center; gap:10px; background:var(--card); padding:10px 14px; border-radius:var(--radius); box-shadow:var(--shadow); margin-bottom:12px; }
+.asr-engine-bar label { font-size:13px; color:var(--text-light); white-space:nowrap; }
+.asr-engine-btns { display:flex; gap:6px; flex:1; }
+.asr-engine-btn { flex:1; padding:7px 10px; border:1.5px solid var(--border); background:var(--bg); border-radius:20px; font-size:13px; cursor:pointer; transition:all 0.2s; color:var(--text-light); }
+.asr-engine-btn.active { border-color:var(--primary); background:var(--primary); color:white; font-weight:600; }
+.asr-engine-btn:not(.active):hover { border-color:var(--primary); color:var(--primary); }
+.voice-result { background: var(--card); padding: 16px; border-radius: var(--radius); box-shadow: var(--shadow); }
+.voice-original, .voice-translated { margin-bottom: 12px; }
+.voice-original label, .voice-translated label { font-size: 12px; font-weight: 600; color: var(--text-light); display: block; margin-bottom: 4px; }
+.voice-original p, .voice-translated p { font-size: 15px; }
+.voice-translated { display: flex; flex-wrap: wrap; align-items: flex-start; gap: 8px; }
+.voice-translated label { width: 100%; }
+.voice-translated p { flex: 1; }
+
+/* ===== 对话模式 ===== */
+.dialog-setup { display: flex; align-items: center; gap: 12px; margin-bottom: 16px; background: var(--card); padding: 16px; border-radius: var(--radius); box-shadow: var(--shadow); }
+.dialog-person { flex: 1; }
+.dialog-person label { display: block; font-size: 12px; font-weight: 600; color: var(--text-light); margin-bottom: 6px; }
+.dialog-person select { width: 100%; padding: 8px; border: 1px solid var(--border); border-radius: var(--radius-sm); font-size: 14px; }
+.dialog-vs { font-size: 20px; color: var(--text-light); flex-shrink: 0; }
+.dialog-history {
+    min-height: 200px; max-height: 350px; overflow-y: auto;
+    background: var(--card); border-radius: var(--radius); box-shadow: var(--shadow);
+    padding: 16px; margin-bottom: 16px; display: flex; flex-direction: column; gap: 8px;
+}
+.dialog-placeholder { text-align: center; color: var(--text-light); padding: 32px 16px; }
+.dialog-placeholder p { margin-bottom: 8px; font-size: 14px; }
+.dialog-controls { display: flex; gap: 12px; }
+.dialog-record-btn {
+    flex: 1; padding: 16px; border: 2px solid var(--border); border-radius: var(--radius);
+    background: var(--card); font-size: 15px; font-weight: 600; cursor: pointer;
+    transition: all 0.2s; -webkit-user-select: none; user-select: none;
+}
+.dialog-record-btn.person-a { border-color: var(--primary); color: var(--primary); }
+.dialog-record-btn.person-b { border-color: var(--secondary); color: var(--secondary); }
+.dialog-record-btn.recording { transform: scale(0.97); }
+.dialog-record-btn.person-a.recording { background: var(--primary); color: white; }
+.dialog-record-btn.person-b.recording { background: var(--secondary); color: white; }
+
+/* 对话气泡 */
+.dialog-bubble { max-width: 80%; animation: bubbleIn 0.2s ease; }
+@keyframes bubbleIn { from{opacity:0;transform:translateY(8px)} to{opacity:1;transform:translateY(0)} }
+.bubble-a { align-self: flex-start; }
+.bubble-b { align-self: flex-end; margin-left: auto; }
+.bubble-meta { font-size: 11px; color: var(--text-light); margin-bottom: 4px; padding: 0 4px; }
+.bubble-b .bubble-meta { text-align: right; }
+.bubble-text { padding: 10px 14px; border-radius: 16px; font-size: 15px; line-height: 1.6; word-break: break-word; }
+.bubble-a .bubble-text { background: var(--bg); border: 1px solid var(--border); border-bottom-left-radius: 4px; }
+.bubble-b .bubble-text { background: var(--primary); color: white; border-bottom-right-radius: 4px; }
+
+/* ===== 首次配置向导 ===== */
+.wizard-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.7); display: flex; align-items: center; justify-content: center; z-index: 2000; padding: 16px; }
+.wizard-overlay.hidden { display: none; }
+.wizard-box { background: var(--card); border-radius: 20px; width: 100%; max-width: 480px; max-height: 90vh; overflow-y: auto; animation: modalIn 0.3s ease; }
+.wizard-header { padding: 24px 24px 0; text-align: center; }
+.wizard-header .wizard-icon { font-size: 48px; margin-bottom: 8px; }
+.wizard-header h2 { font-size: 22px; font-weight: 700; margin-bottom: 6px; }
+.wizard-header p { font-size: 14px; color: var(--text-light); }
+.wizard-steps { display: flex; justify-content: center; gap: 6px; padding: 16px 24px 0; }
+.wizard-step-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--border); transition: all 0.3s; }
+.wizard-step-dot.active { background: var(--primary); width: 24px; border-radius: 4px; }
+.wizard-step-dot.done { background: var(--secondary); }
+.wizard-body { padding: 20px 24px; }
+.wizard-step { display: none; }
+.wizard-step.active { display: block; }
+.wizard-step-title { font-size: 16px; font-weight: 600; margin-bottom: 4px; }
+.wizard-step-desc { font-size: 13px; color: var(--text-light); margin-bottom: 16px; line-height: 1.5; }
+.wizard-input-group { margin-bottom: 12px; }
+.wizard-input-group label { display: block; font-size: 13px; font-weight: 500; margin-bottom: 5px; color: var(--text); }
+.wizard-input-group input { width: 100%; padding: 11px 12px; border: 1.5px solid var(--border); border-radius: var(--radius-sm); font-size: 14px; transition: border 0.2s; }
+.wizard-input-group input:focus { outline: none; border-color: var(--primary); }
+.wizard-input-group .hint { font-size: 11px; color: var(--text-light); margin-top: 4px; }
+.wizard-actions { display: flex; gap: 10px; padding: 0 24px 24px; }
+.wizard-actions .skip-btn { flex: 1; padding: 12px; border: 1.5px solid var(--border); background: white; border-radius: var(--radius); font-size: 15px; cursor: pointer; color: var(--text-light); }
+.wizard-actions .next-btn { flex: 2; padding: 12px; background: var(--primary); color: white; border: none; border-radius: var(--radius); font-size: 15px; font-weight: 600; cursor: pointer; }
+.wizard-actions .next-btn:hover { background: var(--primary-dark); }
+.wizard-status { font-size: 12px; color: var(--secondary); margin-top: 8px; text-align: center; min-height: 18px; }
+
+/* ===== 历史记录 ===== */
+.history-section { background: var(--card); border-radius: var(--radius); box-shadow: var(--shadow); overflow: hidden; }
+.history-header { display: flex; justify-content: space-between; align-items: center; padding: 16px; border-bottom: 1px solid var(--border); }
+.history-header h3 { font-size: 16px; font-weight: 600; }
+.history-list { max-height: 400px; overflow-y: auto; }
+.history-item { padding: 12px 16px; border-bottom: 1px solid var(--border); cursor: pointer; transition: background 0.15s; }
+.history-item:hover { background: var(--bg); }
+.history-item:last-child { border-bottom: none; }
+.history-source { font-size: 14px; font-weight: 500; margin-bottom: 4px; }
+.history-result { font-size: 13px; color: var(--text-light); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.history-meta { font-size: 11px; color: var(--text-light); margin-top: 4px; }
+.empty-history { text-align: center; color: var(--text-light); padding: 32px; font-size: 14px; }
+
+/* ===== 模型选择栏 ===== */
+.model-bar { position: fixed; bottom: 0; left: 0; right: 0; background: var(--card); padding: 12px 16px; display: flex; gap: 8px; box-shadow: 0 -2px 8px rgba(0,0,0,0.1); z-index: 100; }
+.model-bar select { flex: 1; padding: 10px 12px; border: 1px solid var(--border); border-radius: var(--radius-sm); font-size: 14px; background: white; }
+.model-bar .icon-btn { width: 44px; height: 44px; background: var(--primary); color: white; border-radius: var(--radius-sm); font-size: 22px; font-weight: bold; }
+.model-bar .icon-btn:hover { background: var(--primary-dark); }
+
+/* ===== 底部导航 ===== */
+.bottom-nav { display: flex; position: fixed; bottom: 60px; left: 0; right: 0; background: var(--card); box-shadow: 0 -2px 10px rgba(0,0,0,0.08); z-index: 99; height: var(--bottom-nav-height); }
+.bottom-nav-item { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; border: none; background: transparent; color: var(--text-light); font-size: 11px; cursor: pointer; transition: all 0.2s; padding: 8px; }
+.bottom-nav-item .nav-icon { font-size: 22px; }
+.bottom-nav-item.active { color: var(--primary); }
+.bottom-nav-item.active .nav-icon { transform: scale(1.1); }
+
+/* ===== 弹窗 ===== */
+.modal { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); display: flex; align-items: center; justify-content: center; z-index: 1000; padding: 16px; }
+.modal.hidden { display: none; }
+.modal-content { background: var(--card); border-radius: var(--radius); width: 100%; max-width: 500px; max-height: 90vh; overflow: hidden; animation: modalIn 0.25s ease; }
+@keyframes modalIn { from{opacity:0;transform:scale(0.92)} to{opacity:1;transform:scale(1)} }
+.modal-header { padding: 16px 20px; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; }
+.modal-header h2 { font-size: 18px; font-weight: 600; }
+.modal-body { padding: 20px; overflow-y: auto; max-height: 65vh; }
+.settings-tabs { display: flex; gap: 8px; margin-bottom: 16px; border-bottom: 1px solid var(--border); padding-bottom: 8px; }
+.settings-tab { padding: 8px 16px; border: none; background: none; font-size: 14px; cursor: pointer; border-bottom: 2px solid transparent; margin-bottom: -10px; }
+.settings-tab.active { color: var(--primary); border-bottom-color: var(--primary); font-weight: 600; }
+.settings-content { display: none; }
+.settings-content.active { display: block; }
+.models-list { margin-bottom: 16px; }
+.model-item { display: flex; justify-content: space-between; align-items: center; padding: 12px; background: var(--bg); border-radius: var(--radius-sm); margin-bottom: 8px; }
+.model-item.active-model { border: 2px solid var(--primary); }
+.model-info h4 { font-size: 14px; font-weight: 600; }
+.model-info p { font-size: 12px; color: var(--text-light); margin-top: 2px; }
+.model-actions { display: flex; gap: 4px; }
+.model-actions button { background: none; border: none; font-size: 16px; cursor: pointer; padding: 4px; }
+.form-group { margin-bottom: 16px; }
+.form-group label { display: block; font-size: 14px; font-weight: 500; margin-bottom: 6px; }
+.form-group input, .form-group select { width: 100%; padding: 10px 12px; border: 1px solid var(--border); border-radius: var(--radius-sm); font-size: 14px; background: white; }
+.form-group input:focus, .form-group select:focus { outline: none; border-color: var(--primary); }
+.form-actions { display: flex; justify-content: flex-end; gap: 12px; margin-top: 20px; }
+.setting-item { display: flex; justify-content: space-between; align-items: center; padding: 12px 0; border-bottom: 1px solid var(--border); }
+.setting-item:last-child { border-bottom: none; }
+.setting-item label { font-size: 14px; }
+.setting-item input[type="checkbox"] { width: 20px; height: 20px; accent-color: var(--primary); }
+.setting-item input[type="range"] { width: 120px; }
+
+/* ===== Toast ===== */
+.toast { position: fixed; bottom: 140px; left: 50%; transform: translateX(-50%); background: var(--text); color: white; padding: 12px 24px; border-radius: 24px; font-size: 14px; z-index: 2000; animation: toastIn 0.3s ease; white-space: nowrap; }
+.toast.hidden { display: none; }
+@keyframes toastIn { from{opacity:0;transform:translateX(-50%) translateY(16px)} to{opacity:1;transform:translateX(-50%) translateY(0)} }
+.shortcut-hint { font-size: 12px; opacity: 0.8; font-weight: normal; }
+
+/* ===== 桌面端 ===== */
+@media (min-width: 1024px) {
+    .header, .mobile-only, .bottom-nav { display: none !important; }
+    .sidebar, .desktop-only { display: flex; }
+    body { padding-left: var(--sidebar-width); padding-bottom: 80px; }
+    .main-content { max-width: 900px; padding: 32px; margin: 0 auto; }
+    .model-bar { left: var(--sidebar-width); padding: 16px 32px; }
+    .modal-content { max-width: 600px; }
+    .input-section textarea { min-height: 150px; font-size: 18px; }
+    .output-text { min-height: 120px; font-size: 18px; }
+    .voice-record-btn { padding: 40px; }
+    .mic-icon { font-size: 48px; }
+    .dialog-history { max-height: 500px; }
+}
+
+@media (min-width: 768px) and (max-width: 1023px) {
+    .main-content { padding: 24px; max-width: 700px; }
+}
+
+::-webkit-scrollbar { width: 6px; }
+::-webkit-scrollbar-track { background: var(--bg); border-radius: 3px; }
+::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: var(--text-light); }
+    </style>
+</head>
+<body>
+
+<!-- 安装提示 -->
+<div id="install-banner" class="install-banner hidden">
+    <span>安装应用到主屏幕，离线也能用</span>
+    <button id="install-btn">安装</button>
+    <button id="dismiss-install">×</button>
+</div>
+
+<!-- 顶部导航（移动端） -->
+<header class="header">
+    <h1>🌐 AI翻译助手</h1>
+    <button id="settings-btn" class="icon-btn">⚙️</button>
+</header>
+
+<!-- 桌面端侧边栏 -->
+<nav class="sidebar">
+    <div class="sidebar-header"><h1>🌐 AI翻译助手</h1></div>
+    <div class="sidebar-nav">
+        <button class="nav-item active" data-mode="text"><span class="nav-icon">📝</span><span class="nav-label">文本翻译</span></button>
+        <button class="nav-item" data-mode="voice"><span class="nav-icon">🎤</span><span class="nav-label">语音翻译</span></button>
+        <button class="nav-item" data-mode="dialog"><span class="nav-icon">💬</span><span class="nav-label">对话模式</span></button>
+        <button class="nav-item" data-mode="history"><span class="nav-icon">📚</span><span class="nav-label">历史记录</span></button>
+    </div>
+    <div class="sidebar-footer">
+        <button id="sidebar-settings-btn" class="nav-item"><span class="nav-icon">⚙️</span><span class="nav-label">设置</span></button>
+    </div>
+</nav>
+
+<!-- 主内容区 -->
+<main class="main-content">
+    <!-- 移动端模式切换 -->
+    <div class="mode-tabs mobile-only">
+        <button class="mode-tab active" data-mode="text">📝 文本</button>
+        <button class="mode-tab" data-mode="voice">🎤 语音</button>
+        <button class="mode-tab" data-mode="dialog">💬 对话</button>
+    </div>
+
+    <!-- 文本翻译模式 -->
+    <div id="text-mode" class="mode-content active">
+        <div class="language-selector">
+            <select id="source-lang">
+                <option value="zh-CN">🇨🇳 中文</option>
+                <option value="en-US">🇺🇸 English</option>
+                <option value="th-TH">🇹🇭 ไทย</option>
+            </select>
+            <button id="swap-lang" class="swap-btn" title="交换语言">⇄</button>
+            <select id="target-lang">
+                <option value="en-US">🇺🇸 English</option>
+                <option value="zh-CN">🇨🇳 中文</option>
+                <option value="th-TH">🇹🇭 ไทย</option>
+            </select>
+        </div>
+        <div class="input-section">
+            <textarea id="input-text" placeholder="输入要翻译的文本..." rows="4"></textarea>
+            <div class="input-actions">
+                <div>
+                    <button id="clear-text" class="text-btn">清空</button>
+                    <button id="paste-text" class="text-btn">粘贴</button>
+                </div>
+                <span class="char-count">0 字符</span>
+            </div>
+        </div>
+        <button id="translate-btn" class="primary-btn">
+            <span class="btn-text">翻译</span>
+            <span class="shortcut-hint">Ctrl+Enter</span>
+        </button>
+        <div class="output-section">
+            <div class="output-header">
+                <span class="output-label">翻译结果</span>
+                <div class="output-actions">
+                    <button id="copy-result" class="icon-btn" title="复制">📋</button>
+                    <button id="speak-result" class="icon-btn" title="朗读">🔊</button>
+                    <button id="share-result" class="icon-btn" title="分享">📤</button>
+                </div>
+            </div>
+            <div id="output-text" class="output-text"></div>
+            <div class="tts-controls">
+                <label>语速: <span id="rate-value">1.0</span></label>
+                <input type="range" id="tts-rate" min="0.5" max="2" step="0.1" value="1">
+            </div>
+        </div>
+    </div>
+
+    <!-- 语音翻译模式 -->
+    <div id="voice-mode" class="mode-content">
+        <div class="voice-status">
+            <div id="voice-indicator" class="voice-indicator"></div>
+            <p id="voice-status-text">点击下方按钮开始录音</p>
+        </div>
+        <div class="asr-engine-bar">
+            <label>识别引擎:</label>
+            <div class="asr-engine-btns">
+                <button class="asr-engine-btn active" data-engine="xunfei">🔬 讯飞</button>
+                <button class="asr-engine-btn" data-engine="groq">⚡ Groq</button>
+                <button class="asr-engine-btn" data-engine="browser">🌐 浏览器</button>
+            </div>
+        </div>
+        <div class="voice-lang-selector">
+            <div class="lang-option">
+                <label>我说</label>
+                <select id="voice-source-lang">
+                    <option value="zh-CN">🇨🇳 中文</option>
+                    <option value="en-US">🇺🇸 English</option>
+                    <option value="th-TH">🇹🇭 ไทย</option>
+                </select>
+            </div>
+            <div class="lang-arrow">→</div>
+            <div class="lang-option">
+                <label>翻译成</label>
+                <select id="voice-target-lang">
+                    <option value="en-US">🇺🇸 English</option>
+                    <option value="zh-CN">🇨🇳 中文</option>
+                    <option value="th-TH">🇹🇭 ไทย</option>
+                </select>
+            </div>
+        </div>
+        <button id="voice-record-btn" class="voice-record-btn">
+            <span class="mic-icon">🎤</span>
+            <span class="record-text">点击开始</span>
+        </button>
+        <div class="voice-result">
+            <div class="voice-original">
+                <label>识别内容:</label>
+                <p id="voice-original-text">-</p>
+            </div>
+            <div class="voice-translated">
+                <label>翻译结果:</label>
+                <p id="voice-translated-text">-</p>
+                <button id="voice-speak-btn" class="icon-btn" title="朗读">🔊</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 对话模式 -->
+    <div id="dialog-mode" class="mode-content">
+        <div class="dialog-setup">
+            <div class="dialog-person">
+                <label>A 说:</label>
+                <select id="dialog-lang-a">
+                    <option value="zh-CN">🇨🇳 中文</option>
+                    <option value="en-US">🇺🇸 English</option>
+                    <option value="th-TH">🇹🇭 ไทย</option>
+                </select>
+            </div>
+            <div class="dialog-vs">⇄</div>
+            <div class="dialog-person">
+                <label>B 说:</label>
+                <select id="dialog-lang-b">
+                    <option value="en-US">🇺🇸 English</option>
+                    <option value="zh-CN">🇨🇳 中文</option>
+                    <option value="th-TH">🇹🇭 ไทย</option>
+                </select>
+            </div>
+        </div>
+        <div id="dialog-history" class="dialog-history">
+            <div class="dialog-placeholder">
+                <p>点击下方按钮开始对话</p>
+                <p>系统会自动识别说话者并翻译</p>
+            </div>
+        </div>
+        <div class="dialog-controls">
+            <button id="dialog-record-a" class="dialog-record-btn person-a">🎤 A 开始</button>
+            <button id="dialog-record-b" class="dialog-record-btn person-b">🎤 B 开始</button>
+        </div>
+    </div>
+
+    <!-- 历史记录 -->
+    <div class="history-section" style="display:none">
+        <div class="history-header">
+            <h3>📚 历史记录</h3>
+            <button id="clear-history" class="text-btn">清空</button>
+        </div>
+        <div id="history-list" class="history-list">
+            <p class="empty-history">暂无历史记录</p>
+        </div>
+    </div>
+</main>
+
+<!-- 移动端底部Tab导航 -->
+<nav class="bottom-nav mobile-only">
+    <button class="bottom-nav-item active" data-mode="text"><span class="nav-icon">📝</span><span class="nav-label">文本</span></button>
+    <button class="bottom-nav-item" data-mode="voice"><span class="nav-icon">🎤</span><span class="nav-label">语音</span></button>
+    <button class="bottom-nav-item" data-mode="dialog"><span class="nav-icon">💬</span><span class="nav-label">对话</span></button>
+    <button class="bottom-nav-item" data-mode="history"><span class="nav-icon">📚</span><span class="nav-label">历史</span></button>
+</nav>
+
+<!-- 模型选择栏 -->
+<div class="model-bar">
+    <select id="model-select"><option value="">暂无模型，点击 + 添加</option></select>
+    <button id="add-model-btn" class="icon-btn" title="添加模型">+</button>
+</div>
+
+<!-- 设置弹窗 -->
+<div id="settings-modal" class="modal hidden">
+    <div class="modal-content">
+        <div class="modal-header"><h2>⚙️ 设置</h2><button class="close-modal">×</button></div>
+        <div class="modal-body">
+            <div class="settings-tabs">
+                <button class="settings-tab active" data-tab="models">翻译模型</button>
+                <button class="settings-tab" data-tab="asr">语音识别</button>
+                <button class="settings-tab" data-tab="general">通用</button>
+            </div>
+            <div id="models-tab" class="settings-content active">
+                <div id="models-list" class="models-list"></div>
+                <button id="add-model-form-btn" class="secondary-btn">+ 添加翻译模型</button>
+            </div>
+            <div id="asr-tab" class="settings-content">
+                <div class="form-group">
+                    <label style="font-weight:600;font-size:14px">🔬 讯飞多语种大模型</label>
+                    <p style="font-size:12px;color:var(--text-light);margin:4px 0 10px">支持中英泰实时识别，<a href="https://console.xfyun.cn" target="_blank" style="color:var(--primary)">讯飞控制台</a>获取</p>
+                    <div class="wizard-input-group"><label>APPID</label><input type="text" id="set-xf-appid" placeholder="如: 36c4bfd9"></div>
+                    <div class="wizard-input-group"><label>APIKey</label><input type="password" id="set-xf-apikey" placeholder="32位字符串"></div>
+                    <div class="wizard-input-group"><label>APISecret</label><input type="password" id="set-xf-secret" placeholder="32位字符串"></div>
+                </div>
+                <hr style="border:none;border-top:1px solid var(--border);margin:16px 0">
+                <div class="form-group">
+                    <label style="font-weight:600;font-size:14px">⚡ Groq Whisper</label>
+                    <p style="font-size:12px;color:var(--text-light);margin:4px 0 10px">支持泰语，永久免费，<a href="https://console.groq.com" target="_blank" style="color:var(--primary)">Groq控制台</a>获取</p>
+                    <div class="wizard-input-group"><label>Groq API Key</label><input type="password" id="set-groq-key" placeholder="gsk_..."></div>
+                </div>
+                <button id="save-asr-btn" class="primary-btn" style="margin-top:8px">保存语音设置</button>
+                <div id="asr-save-status" class="wizard-status"></div>
+            </div>
+            <div id="general-tab" class="settings-content">
+                <div class="setting-item"><label>自动朗读翻译结果</label><input type="checkbox" id="auto-speak" checked></div>
+                <div class="setting-item"><label>保存历史记录</label><input type="checkbox" id="save-history" checked></div>
+                <div class="setting-item"><label>默认语速</label><input type="range" id="default-rate" min="0.5" max="2" step="0.1" value="1"></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- 添加模型弹窗 -->
+<div id="add-model-modal" class="modal hidden">
+    <div class="modal-content">
+        <div class="modal-header"><h2>➕ 添加模型</h2><button class="close-modal">×</button></div>
+        <div class="modal-body">
+            <form id="model-form">
+                <div class="form-group">
+                    <label>快速选择预设</label>
+                    <select id="preset-provider">
+                        <option value="">-- 自定义配置 --</option>
+                        <option value="poloai">PoloAI (xyuapi.top)</option>
+                        <option value="openai">OpenAI</option>
+                        <option value="azure">Azure OpenAI</option>
+                    </select>
+                </div>
+                <div class="form-group"><label>模型名称 <span style="color:var(--danger)">*</span></label><input type="text" id="model-name" placeholder="如: GPT-4o Mini" required></div>
+                <div class="form-group"><label>API URL <span style="color:var(--danger)">*</span></label><input type="url" id="model-url" placeholder="https://api.example.com/v1/chat/completions" required></div>
+                <div class="form-group"><label>API Key <span style="color:var(--danger)">*</span></label><input type="password" id="model-key" placeholder="sk-..." required></div>
+                <div class="form-group"><label>Model ID <span style="color:var(--danger)">*</span></label><input type="text" id="model-id" placeholder="gpt-4o-mini" required></div>
+                <div class="form-actions">
+                    <button type="button" class="text-btn close-modal">取消</button>
+                    <button type="submit" class="primary-btn" style="width:auto;padding:10px 24px">保存</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- 首次配置向导 -->
+<div id="setup-wizard" class="wizard-overlay hidden">
+    <div class="wizard-box">
+        <div class="wizard-header">
+            <div class="wizard-icon">🌐</div>
+            <h2>欢迎使用 AI 翻译助手</h2>
+            <p>首次使用需要配置 API，全部保存在您的设备本地</p>
+        </div>
+        <div class="wizard-steps">
+            <div class="wizard-step-dot active" id="dot-0"></div>
+            <div class="wizard-step-dot" id="dot-1"></div>
+            <div class="wizard-step-dot" id="dot-2"></div>
+        </div>
+        <div class="wizard-body">
+            <!-- Step 0: 翻译模型 -->
+            <div class="wizard-step active" id="wstep-0">
+                <div class="wizard-step-title">第 1 步：配置翻译模型</div>
+                <div class="wizard-step-desc">用于将识别的语音翻译成目标语言。使用 PoloAI 兼容 OpenAI 接口。</div>
+                <div class="wizard-input-group">
+                    <label>API URL</label>
+                    <input type="url" id="w-model-url" value="https://poloai.top/v1/chat/completions" placeholder="https://...">
+                </div>
+                <div class="wizard-input-group">
+                    <label>API Key</label>
+                    <input type="password" id="w-model-key" placeholder="sk-...">
+                    <div class="hint">从 PoloAI 或 OpenAI 获取</div>
+                </div>
+                <div class="wizard-input-group">
+                    <label>Model ID</label>
+                    <input type="text" id="w-model-id" value="gpt-5-mini" placeholder="gpt-4o-mini">
+                </div>
+            </div>
+            <!-- Step 1: 讯飞 -->
+            <div class="wizard-step" id="wstep-1">
+                <div class="wizard-step-title">第 2 步：讯飞语音识别（可选）</div>
+                <div class="wizard-step-desc">支持中英泰实时识别，效果最佳。从 <a href="https://console.xfyun.cn" target="_blank" style="color:var(--primary)">讯飞控制台</a> → 多语种识别大模型 获取。</div>
+                <div class="wizard-input-group">
+                    <label>APPID</label>
+                    <input type="text" id="w-xf-appid" placeholder="如: 36c4bfd9">
+                </div>
+                <div class="wizard-input-group">
+                    <label>APIKey</label>
+                    <input type="password" id="w-xf-apikey" placeholder="32位字符串">
+                </div>
+                <div class="wizard-input-group">
+                    <label>APISecret</label>
+                    <input type="password" id="w-xf-secret" placeholder="32位字符串">
+                </div>
+            </div>
+            <!-- Step 2: Groq -->
+            <div class="wizard-step" id="wstep-2">
+                <div class="wizard-step-title">第 3 步：Groq Whisper（可选）</div>
+                <div class="wizard-step-desc">支持泰语，永久免费备用引擎。从 <a href="https://console.groq.com" target="_blank" style="color:var(--primary)">console.groq.com</a> → API Keys 获取。</div>
+                <div class="wizard-input-group">
+                    <label>Groq API Key</label>
+                    <input type="password" id="w-groq-key" placeholder="gsk_...">
+                </div>
+                <div class="wizard-status" id="wizard-status"></div>
+            </div>
+        </div>
+        <div class="wizard-actions">
+            <button class="skip-btn" id="wizard-skip">跳过</button>
+            <button class="next-btn" id="wizard-next">下一步 →</button>
+        </div>
+    </div>
+</div>
+
+<div id="toast" class="toast hidden"></div>
+
+<script>
+// ==================== config.js ====================
+const CONFIG_KEY = 'ai_translator_models';
+const SETTINGS_KEY = 'ai_translator_settings';
+const ACTIVE_MODEL_KEY = 'ai_translator_active_model';
+const HISTORY_KEY = 'ai_translator_history';
+const ASR_KEY = 'ai_translator_asr';
+const SETUP_DONE_KEY = 'ai_translator_setup_done';
+const MAX_HISTORY = 50;
+
+const PRESETS = {
+    poloai: { name: 'PoloAI', url: 'https://poloai.top/v1/chat/completions', modelId: 'gpt-5-mini' },
+    openai: { name: 'OpenAI', url: 'https://api.openai.com/v1/chat/completions', modelId: 'gpt-4o-mini' },
+    azure:  { name: 'Azure OpenAI', url: 'https://YOUR_RESOURCE.openai.azure.com/openai/deployments/YOUR_DEPLOYMENT/chat/completions?api-version=2024-02-01', modelId: 'gpt-4o' }
+};
+
+const LANG_LABELS = { 'zh-CN': '中文', 'en-US': 'English', 'th-TH': 'ไทย' };
+const LANG_NAMES  = { 'zh-CN': '中文（简体）', 'en-US': '英语', 'th-TH': '泰语' };
+
+function encode(str) { try { return btoa(unescape(encodeURIComponent(str))); } catch { return str; } }
+function decode(str) { try { return decodeURIComponent(escape(atob(str))); } catch { return str; } }
+
+function getModels() {
+    try { const r = localStorage.getItem(CONFIG_KEY); return r ? JSON.parse(decode(r)) : []; } catch { return []; }
+}
+function saveModels(m) { try { localStorage.setItem(CONFIG_KEY, encode(JSON.stringify(m))); } catch {} }
+function addModel(m) {
+    const models = getModels();
+    const nm = { id: Date.now().toString(), ...m, createdAt: new Date().toISOString() };
+    models.push(nm); saveModels(models); return nm;
+}
+function deleteModel(id) { saveModels(getModels().filter(m => m.id !== id)); if (getActiveModelId() === id) setActiveModel(null); }
+function getActiveModelId() { return localStorage.getItem(ACTIVE_MODEL_KEY); }
+function setActiveModel(id) { id ? localStorage.setItem(ACTIVE_MODEL_KEY, id) : localStorage.removeItem(ACTIVE_MODEL_KEY); }
+function getActiveModel() { const id = getActiveModelId(); return id ? getModels().find(m => m.id === id) || null : null; }
+
+function getDefaultSettings() { return { autoSpeak: true, saveHistory: true, defaultRate: 1.0 }; }
+function getSettings() { try { const r = localStorage.getItem(SETTINGS_KEY); return r ? { ...getDefaultSettings(), ...JSON.parse(r) } : getDefaultSettings(); } catch { return getDefaultSettings(); } }
+function saveSettings(s) { localStorage.setItem(SETTINGS_KEY, JSON.stringify(s)); }
+
+function getHistory() { try { const r = localStorage.getItem(HISTORY_KEY); return r ? JSON.parse(r) : []; } catch { return []; } }
+function addHistory(entry) {
+    if (!getSettings().saveHistory) return;
+    const h = getHistory();
+    h.unshift({ id: Date.now().toString(), ...entry, timestamp: new Date().toISOString() });
+    if (h.length > MAX_HISTORY) h.splice(MAX_HISTORY);
+    localStorage.setItem(HISTORY_KEY, JSON.stringify(h));
+}
+function clearHistory() { localStorage.removeItem(HISTORY_KEY); }
+
+// ASR 配置
+function getAsrConfig() {
+    try { const r = localStorage.getItem(ASR_KEY); return r ? JSON.parse(decode(r)) : {}; } catch { return {}; }
+}
+function saveAsrConfig(cfg) {
+    try { localStorage.setItem(ASR_KEY, encode(JSON.stringify(cfg))); } catch {}
+}
+function isSetupDone() { return !!localStorage.getItem(SETUP_DONE_KEY); }
+function markSetupDone() { localStorage.setItem(SETUP_DONE_KEY, '1'); }
+
+// ==================== api.js ====================
+function buildTranslationPrompt(text, srcLang, tgtLang) {
+    const sn = LANG_NAMES[srcLang] || srcLang, tn = LANG_NAMES[tgtLang] || tgtLang;
+    return {
+        system: `你是一名专业翻译，精通${sn}和${tn}互译。规则：1.只输出翻译结果，不加任何解释 2.保持原文语气和格式 3.专业术语准确翻译 4.若原文已是目标语言则直接返回`,
+        user: `将以下${sn}翻译成${tn}：\n\n${text}`
+    };
+}
+
+async function translateStreaming(text, srcLang, tgtLang, { onChunk, onDone, onError }) {
+    const model = getActiveModel();
+    if (!model) { onError(new Error('请先选择一个AI模型')); return null; }
+
+    const { system, user } = buildTranslationPrompt(text, srcLang, tgtLang);
+    const controller = new AbortController();
+
+    try {
+        const response = await fetch(model.url, {
+            method: 'POST',
+            headers: { 'Authorization': `Bearer ${model.key}`, 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                model: model.modelId,
+                messages: [{ role: 'system', content: system }, { role: 'user', content: user }],
+                stream: true, temperature: 0.3, max_tokens: 2000
+            }),
+            signal: controller.signal
+        });
+
+        if (!response.ok) {
+            let msg = `HTTP ${response.status}`;
+            try { const j = await response.json(); msg = j.error?.message || msg; } catch {}
+            throw new Error(msg);
+        }
+
+        const reader = response.body.getReader();
+        const decoder = new TextDecoder('utf-8');
+        let buffer = '';
+
+        while (true) {
+            const { done, value } = await reader.read();
+            if (done) break;
+            buffer += decoder.decode(value, { stream: true });
+            const lines = buffer.split('\n');
+            buffer = lines.pop();
+            for (const line of lines) {
+                const t = line.trim();
+                if (!t || !t.startsWith('data: ')) continue;
+                const data = t.slice(6);
+                if (data === '[DONE]') { onDone(); return controller; }
+                try {
+                    const j = JSON.parse(data);
+                    const delta = j.choices?.[0]?.delta?.content;
+                    if (delta) onChunk(delta);
+                } catch {}
+            }
+        }
+        onDone();
+    } catch (err) {
+        if (err.name !== 'AbortError') onError(err);
+    }
+    return controller;
+}
+
+// ==================== speech.js ====================
+
+// ---- 讯飞多语种大模型 ASR ----
+const XF_ASR_HOST  = 'iat.cn-huabei-1.xf-yun.com';
+const XF_ASR_PATH  = '/v1';
+
+// 讯飞语言码映射
+const XF_LANG_MAP = {
+    'zh-CN': 'zh_cn',
+    'en-US': 'en_us',
+    'th-TH': 'th_th'
+};
+
+// HMAC-SHA256 签名（使用 SubtleCrypto）
+async function hmacSha256Base64(secret, message) {
+    const enc = new TextEncoder();
+    const key = await crypto.subtle.importKey('raw', enc.encode(secret), { name:'HMAC', hash:'SHA-256' }, false, ['sign']);
+    const sig = await crypto.subtle.sign('HMAC', key, enc.encode(message));
+    return btoa(String.fromCharCode(...new Uint8Array(sig)));
+}
+
+async function buildXfWsUrl() {
+    const cfg = getAsrConfig();
+    if (!cfg.xfAppid || !cfg.xfApiKey || !cfg.xfApiSecret) throw new Error('讯飞未配置，请在设置→语音识别中填写');
+    const date = new Date().toUTCString();
+    const signOrigin = `host: ${XF_ASR_HOST}\ndate: ${date}\nGET ${XF_ASR_PATH} HTTP/1.1`;
+    const signature  = await hmacSha256Base64(cfg.xfApiSecret, signOrigin);
+    const authOrigin = `api_key="${cfg.xfApiKey}", algorithm="hmac-sha256", headers="host date request-line", signature="${signature}"`;
+    const auth       = btoa(authOrigin);
+    return `wss://${XF_ASR_HOST}${XF_ASR_PATH}?authorization=${encodeURIComponent(auth)}&date=${encodeURIComponent(date)}&host=${XF_ASR_HOST}`;
+}
+
+class XunfeiASR {
+    constructor() {
+        this.ws = null;
+        this.mediaRecorder = null;
+        this.stream = null;
+        this.isRecording = false;
+        this.resultText = '';
+    }
+
+    async start(lang, callbacks) {
+        this.resultText = '';
+        this.callbacks = callbacks;
+
+        // 1. 获取麦克风
+        try {
+            this.stream = await navigator.mediaDevices.getUserMedia({ audio: { sampleRate:16000, channelCount:1, echoCancellation:true } });
+        } catch(e) {
+            callbacks.onError('麦克风权限被拒绝，请允许访问麦克风');
+            return;
+        }
+
+        // 2. 建立 WebSocket
+        let wsUrl;
+        try { wsUrl = await buildXfWsUrl(); } catch(e) { callbacks.onError('鉴权失败: ' + e.message); return; }
+
+        this.ws = new WebSocket(wsUrl);
+        this.ws.binaryType = 'arraybuffer';
+
+        this.ws.onopen = () => {
+            this.isRecording = true;
+            callbacks.onStart?.();
+            this._startCapture(lang);
+        };
+
+        this.ws.onmessage = (e) => {
+            try {
+                const data = JSON.parse(e.data);
+                if (data.code !== 0) { callbacks.onError(`讯飞错误: ${data.message} (${data.code})`); this.stop(); return; }
+                const ws = data.data?.result?.ws || [];
+                const chunk = ws.map(w => w.cw?.map(c => c.w).join('') || '').join('');
+                if (chunk) {
+                    this.resultText += chunk;
+                    callbacks.onResult?.(this.resultText, false);
+                }
+                if (data.data?.status === 2) {
+                    callbacks.onResult?.(this.resultText, true);
+                    callbacks.onEnd?.();
+                    this._cleanup();
+                }
+            } catch {}
+        };
+
+        this.ws.onerror = () => { callbacks.onError('WebSocket连接失败，请检查网络'); this._cleanup(); };
+        this.ws.onclose = () => { if (this.isRecording) { callbacks.onEnd?.(); this._cleanup(); } };
+    }
+
+    _startCapture(lang) {
+        const xfLang = XF_LANG_MAP[lang] || 'zh_cn';
+        let isFirst = true;
+
+        // 发送业务参数（第一帧）
+        const sendParams = (audioBase64, status) => {
+            if (!this.ws || this.ws.readyState !== WebSocket.OPEN) return;
+            const frame = {
+                common: { app_id: getAsrConfig().xfAppid || '' },
+                business: { language: xfLang, domain: 'slm', accent: 'mandarin', dwa: 'wpgs', pd: 'game', ptt: 0, rlang: 'zh-cn', vinfo: 1, nunum: 0, speex_size: 70, nbest: 1, wbest: 5 },
+                data: { status, format: 'audio/L16;rate=16000', encoding: 'raw', audio: audioBase64 }
+            };
+            if (!isFirst) { delete frame.common; delete frame.business; }
+            this.ws.send(JSON.stringify(frame));
+            isFirst = false;
+        };
+
+        // 用 ScriptProcessor 采集 PCM（16bit, 16kHz, mono）
+        this.audioCtx = new (window.AudioContext || window.webkitAudioContext)({ sampleRate: 16000 });
+        const source = this.audioCtx.createMediaStreamSource(this.stream);
+        this.processor = this.audioCtx.createScriptProcessor(4096, 1, 1);
+
+        this.processor.onaudioprocess = (e) => {
+            if (!this.isRecording) return;
+            const float32 = e.inputBuffer.getChannelData(0);
+            // float32 → int16 PCM
+            const int16 = new Int16Array(float32.length);
+            for (let i = 0; i < float32.length; i++) {
+                int16[i] = Math.max(-32768, Math.min(32767, float32[i] * 32768));
+            }
+            const b64 = btoa(String.fromCharCode(...new Uint8Array(int16.buffer)));
+            sendParams(b64, 1); // status=1 中间帧
+        };
+
+        source.connect(this.processor);
+        this.processor.connect(this.audioCtx.destination);
+        this.source = source;
+    }
+
+    stop() {
+        this.isRecording = false;
+        // 发结束帧
+        if (this.ws && this.ws.readyState === WebSocket.OPEN) {
+            this.ws.send(JSON.stringify({ data: { status: 2, format: 'audio/L16;rate=16000', encoding: 'raw', audio: '' } }));
+        }
+        this._stopCapture();
+    }
+
+    _stopCapture() {
+        try { this.processor?.disconnect(); this.source?.disconnect(); this.audioCtx?.close(); } catch {}
+        try { this.stream?.getTracks().forEach(t => t.stop()); } catch {}
+        this.processor = null; this.source = null; this.audioCtx = null; this.stream = null;
+    }
+
+    _cleanup() {
+        this.isRecording = false;
+        this._stopCapture();
+        try { this.ws?.close(); } catch {}
+        this.ws = null;
+    }
+}
+
+// ---- 浏览器原生 ASR ----
+class BrowserASR {
+    constructor() {
+        const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+        this.supported = !!SR;
+        if (!SR) return;
+        this.rec = new SR();
+        this.rec.continuous = true;
+        this.rec.interimResults = true;
+        this.isRecording = false;
+        this.rec.onresult = (e) => {
+            let interim = '', final = '';
+            for (let i = e.resultIndex; i < e.results.length; i++) {
+                const t = e.results[i][0].transcript;
+                e.results[i].isFinal ? (final += t) : (interim += t);
+            }
+            this.onResult?.(final || interim, !!final);
+        };
+        this.rec.onerror = (e) => {
+            const msgs = { 'not-allowed':'麦克风权限被拒绝', 'no-speech':'未检测到语音', 'network':'网络错误' };
+            this.onError?.(msgs[e.error] || '识别出错: ' + e.error);
+        };
+        this.rec.onend = () => { if (this.isRecording) { try { this.rec.start(); } catch {} } };
+    }
+    start(lang, cbs) {
+        if (!this.supported) { cbs.onError('浏览器不支持语音识别，请用 Chrome/Edge 或切换为讯飞引擎'); return; }
+        this.onResult = cbs.onResult; this.onError = cbs.onError; this.onEnd = cbs.onEnd;
+        this.isRecording = true;
+        try { this.rec.lang = lang; this.rec.start(); cbs.onStart?.(); } catch {}
+    }
+    stop(cbs) {
+        this.isRecording = false;
+        try { this.rec.stop(); } catch {}
+        setTimeout(() => cbs?.onEnd?.(), 300);
+    }
+}
+
+const xfASR      = new XunfeiASR();
+const browserASR = new BrowserASR();
+let   asrEngine  = 'xunfei'; // 当前引擎
+
+// ---- Groq Whisper ASR ----
+const GROQ_LANG_MAP = { 'zh-CN': 'zh', 'en-US': 'en', 'th-TH': 'th' };
+
+class GroqASR {
+    constructor() {
+        this.isRecording = false;
+        this.mediaRecorder = null;
+        this.stream = null;
+        this.chunks = [];
+    }
+
+    async start(lang, callbacks) {
+        this.callbacks = callbacks;
+        this.chunks = [];
+
+        try {
+            this.stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+        } catch(e) {
+            callbacks.onError('麦克风权限被拒绝，请允许访问麦克风'); return;
+        }
+
+        // 选择浏览器支持的格式
+        const mimeType = MediaRecorder.isTypeSupported('audio/webm;codecs=opus')
+            ? 'audio/webm;codecs=opus'
+            : MediaRecorder.isTypeSupported('audio/webm') ? 'audio/webm' : 'audio/mp4';
+
+        this.mediaRecorder = new MediaRecorder(this.stream, { mimeType });
+        this.mediaRecorder.ondataavailable = e => { if (e.data.size > 0) this.chunks.push(e.data); };
+        this.mediaRecorder.onstop = () => this._transcribe(lang);
+        this.mediaRecorder.start(100);
+        this.isRecording = true;
+        callbacks.onStart?.();
+    }
+
+    stop() {
+        if (!this.isRecording) return;
+        this.isRecording = false;
+        try { this.mediaRecorder?.stop(); } catch {}
+        try { this.stream?.getTracks().forEach(t => t.stop()); } catch {}
+    }
+
+    async _transcribe(lang) {
+        if (!this.chunks.length) { this.callbacks.onEnd?.(); return; }
+        const groqKey = getAsrConfig().groqKey;
+        if (!groqKey) { this.callbacks.onError('Groq 未配置，请在设置→语音识别中填写 API Key'); return; }
+
+        const mimeType = this.mediaRecorder?.mimeType || 'audio/webm';
+        const ext = mimeType.includes('mp4') ? 'mp4' : 'webm';
+        const blob = new Blob(this.chunks, { type: mimeType });
+        this.chunks = [];
+
+        const formData = new FormData();
+        formData.append('file', blob, `audio.${ext}`);
+        formData.append('model', 'whisper-large-v3');
+        formData.append('language', GROQ_LANG_MAP[lang] || 'zh');
+        formData.append('response_format', 'json');
+
+        try {
+            const res = await fetch('https://api.groq.com/openai/v1/audio/transcriptions', {
+                method: 'POST',
+                headers: { 'Authorization': `Bearer ${groqKey}` },
+                body: formData
+            });
+            if (!res.ok) {
+                const err = await res.json();
+                throw new Error(err.error?.message || `HTTP ${res.status}`);
+            }
+            const data = await res.json();
+            const text = data.text?.trim();
+            if (text) {
+                this.callbacks.onResult?.(text, true);
+            } else {
+                this.callbacks.onError?.('未识别到语音内容，请重试');
+                return;
+            }
+        } catch(e) {
+            this.callbacks.onError?.('Groq识别失败: ' + e.message);
+            return;
+        }
+        this.callbacks.onEnd?.();
+    }
+}
+
+const groqASR = new GroqASR();
+
+// ---- TTS ----
+class SpeechSynthesizer {
+    constructor() {
+        this.supported = 'speechSynthesis' in window;
+        this._voices = [];
+        if (this.supported) {
+            this._load();
+            if (speechSynthesis.onvoiceschanged !== undefined) speechSynthesis.onvoiceschanged = () => this._load();
+        }
+    }
+    _load() { this._voices = speechSynthesis.getVoices(); }
+    _best(lang) {
+        let v = this._voices.find(v => v.lang === lang);
+        if (!v) v = this._voices.find(v => v.lang.startsWith(lang.split('-')[0]));
+        return v || null;
+    }
+    speak(text, lang = 'zh-CN', rate = 1.0) {
+        if (!this.supported || !text) return;
+        speechSynthesis.cancel();
+        const u = new SpeechSynthesisUtterance(text);
+        u.lang = lang; u.rate = rate; u.pitch = 1; u.volume = 1;
+        const v = this._best(lang); if (v) u.voice = v;
+        speechSynthesis.speak(u);
+    }
+    stop() { if (this.supported) speechSynthesis.cancel(); }
+}
+const synthesizer = new SpeechSynthesizer();
+
+function speak(text, lang, rate) { synthesizer.speak(text, lang, rate || getSettings().defaultRate); }
+
+// ==================== app.js ====================
+let currentMode = 'text';
+let currentAbort = null;
+let deferredInstall = null;
+
+const $ = s => document.querySelector(s);
+const $$ = s => document.querySelectorAll(s);
+
+document.addEventListener('DOMContentLoaded', () => {
+    initNav();
+    initText();
+    initVoice();
+    initDialog();
+    initSettings();
+    initAsrSettings();
+    initModelBar();
+    initHistory();
+    initInstall();
+
+    // 加载设置
+    const s = getSettings();
+    const tr = $('#tts-rate'); if (tr) { tr.value = s.defaultRate; $('#rate-value').textContent = s.defaultRate.toFixed(1); }
+
+    // 首次使用：弹出配置向导
+    if (!isSetupDone()) {
+        initWizard();
+    } else {
+        // 已配置：恢复 ASR 设置到设置页
+        loadAsrSettingsUI();
+    }
+
+    // 默认显示文本模式
+    switchMode('text');
+
+    // Ctrl+Enter 快捷键
+    document.addEventListener('keydown', e => {
+        if ((e.ctrlKey || e.metaKey) && e.key === 'Enter' && currentMode === 'text') handleTranslate();
+    });
+});
+
+// ---- 导航 ----
+function initNav() {
+    $$('[data-mode]').forEach(btn => btn.addEventListener('click', () => switchMode(btn.dataset.mode)));
+}
+
+function switchMode(mode) {
+    currentMode = mode;
+    $$('[data-mode]').forEach(b => b.classList.toggle('active', b.dataset.mode === mode));
+    $$('.mode-content').forEach(el => el.classList.remove('active'));
+    const hist = $('.history-section');
+    if (mode === 'history') {
+        if (hist) hist.style.display = 'block';
+        renderHistory();
+    } else {
+        if (hist) hist.style.display = 'none';
+        $(`#${mode}-mode`)?.classList.add('active');
+    }
+}
+
+// ---- 文本翻译 ----
+function initText() {
+    $('#input-text').addEventListener('input', () => { $('.char-count').textContent = `${$('#input-text').value.length} 字符`; });
+    $('#translate-btn').addEventListener('click', handleTranslate);
+    $('#clear-text').addEventListener('click', () => { $('#input-text').value = ''; $('.char-count').textContent = '0 字符'; $('#output-text').textContent = ''; });
+    $('#paste-text').addEventListener('click', async () => {
+        try { const t = await navigator.clipboard.readText(); $('#input-text').value = t; $('.char-count').textContent = `${t.length} 字符`; showToast('已粘贴'); }
+        catch { showToast('粘贴失败，请手动粘贴'); }
+    });
+    $('#swap-lang').addEventListener('click', () => {
+        const s = $('#source-lang'), t = $('#target-lang'), tmp = s.value;
+        s.value = t.value; t.value = tmp;
+        const out = $('#output-text').textContent;
+        if (out) { $('#input-text').value = out; $('.char-count').textContent = `${out.length} 字符`; $('#output-text').textContent = ''; }
+    });
+    $('#copy-result').addEventListener('click', async () => {
+        const t = $('#output-text').textContent; if (!t) return;
+        try { await navigator.clipboard.writeText(t); showToast('已复制'); } catch { showToast('复制失败'); }
+    });
+    $('#speak-result').addEventListener('click', () => {
+        const t = $('#output-text').textContent, lang = $('#target-lang').value, rate = parseFloat($('#tts-rate').value);
+        if (t) speak(t, lang, rate);
+    });
+    $('#share-result').addEventListener('click', async () => {
+        const t = $('#output-text').textContent; if (!t) return;
+        if (navigator.share) { try { await navigator.share({ text: t }); } catch {} }
+        else { await navigator.clipboard.writeText(t); showToast('已复制，可粘贴分享'); }
+    });
+    $('#tts-rate').addEventListener('input', () => { $('#rate-value').textContent = parseFloat($('#tts-rate').value).toFixed(1); });
+}
+
+async function handleTranslate() {
+    const text = $('#input-text').value.trim();
+    if (!text) { showToast('请输入要翻译的文本'); return; }
+    if (!getActiveModel()) { showToast('请先添加并选择AI模型 👆'); $('#add-model-btn').click(); return; }
+    if (currentAbort) currentAbort.abort();
+
+    const srcLang = $('#source-lang').value, tgtLang = $('#target-lang').value;
+    const outEl = $('#output-text'), btn = $('#translate-btn'), btnTxt = btn.querySelector('.btn-text');
+
+    btnTxt.textContent = '翻译中...'; btn.disabled = true;
+    outEl.textContent = ''; outEl.classList.add('streaming');
+    let full = '';
+
+    currentAbort = await translateStreaming(text, srcLang, tgtLang, {
+        onChunk: c => { full += c; outEl.textContent = full; },
+        onDone: () => {
+            outEl.classList.remove('streaming'); btnTxt.textContent = '翻译'; btn.disabled = false;
+            if (getSettings().autoSpeak && full) speak(full, tgtLang, parseFloat($('#tts-rate').value));
+            if (full) addHistory({ type: 'text', source: text, result: full, sourceLang: srcLang, targetLang: tgtLang, model: getActiveModel()?.name });
+        },
+        onError: err => {
+            outEl.classList.remove('streaming'); btnTxt.textContent = '翻译'; btn.disabled = false;
+            outEl.textContent = ''; showToast(`翻译失败: ${err.message}`);
+        }
+    });
+}
+
+// ---- 语音翻译 ----
+function initVoice() {
+    const btn = $('#voice-record-btn');
+    const statusTxt = $('#voice-status-text');
+    const indicator = $('#voice-indicator');
+    let isRec = false;
+
+    // 引擎切换
+    $$('.asr-engine-btn').forEach(b => b.addEventListener('click', () => {
+        if (isRec) { showToast('请先停止录音'); return; }
+        $$('.asr-engine-btn').forEach(x => x.classList.remove('active'));
+        b.classList.add('active');
+        asrEngine = b.dataset.engine;
+        const labels = { xunfei: '已切换为讯飞大模型 🔬', groq: '已切换为 Groq Whisper ⚡', browser: '已切换为浏览器识别 🌐' };
+        showToast(labels[asrEngine] || '已切换引擎');
+    }));
+
+    function setRecUI(recording) {
+        isRec = recording;
+        btn.classList.toggle('recording', recording);
+        indicator.classList.toggle('active', recording);
+        btn.querySelector('.mic-icon').textContent = recording ? '⏹️' : '🎤';
+        btn.querySelector('.record-text').textContent = recording ? '点击停止' : '点击开始';
+        if (!recording) statusTxt.textContent = '点击下方按钮开始录音';
+    }
+
+    const cbs = {
+        onStart: () => {
+            setRecUI(true);
+            const hint = asrEngine === 'groq' ? '⚡ 录音中... 点击停止后上传识别' : '正在录音... 点击停止';
+            statusTxt.textContent = hint;
+            $('#voice-original-text').textContent = '...';
+        },
+        onResult: (text, isFinal) => {
+            $('#voice-original-text').textContent = text;
+            if (isFinal && asrEngine === 'xunfei') return; // xunfei onEnd handles translate
+        },
+        onEnd: async () => {
+            const transcript = $('#voice-original-text').textContent;
+            setRecUI(false);
+            if (!transcript || transcript === '...' || transcript === '-') { statusTxt.textContent = '未识别到内容，请重试'; return; }
+            statusTxt.textContent = '翻译中...';
+            if (!getActiveModel()) { showToast('请先选择AI翻译模型'); statusTxt.textContent = '点击下方按钮开始录音'; return; }
+            const src = $('#voice-source-lang').value, tgt = $('#voice-target-lang').value;
+            let res = '';
+            await translateStreaming(transcript, src, tgt, {
+                onChunk: c => { res += c; $('#voice-translated-text').textContent = res; },
+                onDone: () => {
+                    statusTxt.textContent = '✅ 完成，再次点击开始新录音';
+                    if (getSettings().autoSpeak && res) speak(res, tgt);
+                    addHistory({ type: 'voice', source: transcript, result: res, sourceLang: src, targetLang: tgt });
+                },
+                onError: err => { statusTxt.textContent = `翻译失败: ${err.message}`; }
+            });
+        },
+        onError: msg => { setRecUI(false); statusTxt.textContent = msg; showToast(msg); }
+    };
+
+    btn.addEventListener('click', async () => {
+        if (!isRec) {
+            // 开始录音
+            if (asrEngine === 'xunfei') {
+                await xfASR.start($('#voice-source-lang').value, cbs);
+            } else if (asrEngine === 'groq') {
+                await groqASR.start($('#voice-source-lang').value, cbs);
+            } else {
+                browserASR.start($('#voice-source-lang').value, cbs);
+            }
+        } else {
+            // 停止录音
+            if (asrEngine === 'groq') {
+                statusTxt.textContent = '⚡ 识别中，请稍候...';
+            } else {
+                statusTxt.textContent = '处理中...';
+            }
+            if (asrEngine === 'xunfei') {
+                xfASR.stop();
+            } else if (asrEngine === 'groq') {
+                groqASR.stop();
+            } else {
+                browserASR.stop(cbs);
+            }
+            setRecUI(false);
+        }
+    });
+
+    $('#voice-speak-btn').addEventListener('click', () => {
+        const t = $('#voice-translated-text').textContent, lang = $('#voice-target-lang').value;
+        if (t && t !== '-') speak(t, lang);
+    });
+}
+
+// ---- 对话模式 ----
+function initDialog() {
+    function setupBtn(person) {
+        const btn = person === 'a' ? $('#dialog-record-a') : $('#dialog-record-b');
+        let isRec = false;
+
+        function setUI(recording) {
+            isRec = recording;
+            btn.classList.toggle('recording', recording);
+            btn.textContent = recording ? `⏹️ ${person.toUpperCase()} 停止` : `🎤 ${person.toUpperCase()} 开始`;
+        }
+
+        btn.addEventListener('click', async () => {
+            if (!isRec) {
+                // 停止另一人的录音（互斥）
+                const otherBtn = person === 'a' ? $('#dialog-record-b') : $('#dialog-record-a');
+                if (otherBtn.classList.contains('recording')) { showToast('请先停止另一人的录音'); return; }
+
+                const langA = $('#dialog-lang-a').value, langB = $('#dialog-lang-b').value;
+                const myLang = person === 'a' ? langA : langB, tgtLang = person === 'a' ? langB : langA;
+                let transcript = '';
+
+                const cbs = {
+                    onStart: () => { setUI(true); },
+                    onResult: (t) => { transcript = t; },
+                    onEnd: async () => {
+                        setUI(false);
+                        if (!transcript) return;
+                        const histEl = $('#dialog-history');
+                        addBubble(histEl, person, transcript, myLang, false);
+                        if (!getActiveModel()) { showToast('请先选择AI翻译模型'); return; }
+                        const transEl = addBubble(histEl, person === 'a' ? 'b' : 'a', '...', tgtLang, true);
+                        let res = '';
+                        await translateStreaming(transcript, myLang, tgtLang, {
+                            onChunk: c => { res += c; transEl.textContent = res; histEl.scrollTop = histEl.scrollHeight; },
+                            onDone: () => { if (getSettings().autoSpeak && res) speak(res, tgtLang); histEl.querySelector('.dialog-placeholder')?.remove(); },
+                            onError: err => { transEl.textContent = `[翻译失败: ${err.message}]`; }
+                        });
+                    },
+                    onError: msg => { setUI(false); showToast(msg); }
+                };
+
+                if (asrEngine === 'xunfei') { await xfASR.start(myLang, cbs); }
+                else if (asrEngine === 'groq') { await groqASR.start(myLang, cbs); }
+                else { browserASR.start(myLang, cbs); }
+            } else {
+                setUI(false);
+                if (asrEngine === 'xunfei') { xfASR.stop(); }
+                else if (asrEngine === 'groq') { groqASR.stop(); }
+                else { browserASR.stop({ onEnd: () => {} }); }
+            }
+        });
+    }
+    setupBtn('a'); setupBtn('b');
+}
+
+function addBubble(container, person, text, lang, isTrans) {
+    container.querySelector('.dialog-placeholder')?.remove();
+    const div = document.createElement('div');
+    div.className = `dialog-bubble bubble-${person}`;
+    div.innerHTML = `<div class="bubble-meta">${person.toUpperCase()} · ${LANG_LABELS[lang] || lang}${isTrans ? ' · 翻译' : ''}</div><div class="bubble-text">${text}</div>`;
+    container.appendChild(div);
+    container.scrollTop = container.scrollHeight;
+    return div.querySelector('.bubble-text');
+}
+
+// ---- 设置 ----
+function initSettings() {
+    $('#settings-btn')?.addEventListener('click', openSettings);
+    $('#sidebar-settings-btn')?.addEventListener('click', openSettings);
+    $$('.close-modal').forEach(b => b.addEventListener('click', () => $$('.modal').forEach(m => m.classList.add('hidden'))));
+    $$('.modal').forEach(m => m.addEventListener('click', e => { if (e.target === m) m.classList.add('hidden'); }));
+    $$('.settings-tab').forEach(tab => tab.addEventListener('click', () => {
+        $$('.settings-tab').forEach(t => t.classList.remove('active'));
+        $$('.settings-content').forEach(c => c.classList.remove('active'));
+        tab.classList.add('active'); $(`#${tab.dataset.tab}-tab`)?.classList.add('active');
+    }));
+    $('#auto-speak')?.addEventListener('change', e => { const s = getSettings(); s.autoSpeak = e.target.checked; saveSettings(s); });
+    $('#save-history')?.addEventListener('change', e => { const s = getSettings(); s.saveHistory = e.target.checked; saveSettings(s); });
+    $('#default-rate')?.addEventListener('input', e => { const s = getSettings(); s.defaultRate = parseFloat(e.target.value); saveSettings(s); });
+    $('#add-model-form-btn')?.addEventListener('click', () => { $('#settings-modal').classList.add('hidden'); openAddModel(); });
+    $('#preset-provider')?.addEventListener('change', e => {
+        const p = PRESETS[e.target.value]; if (!p) return;
+        $('#model-name').value = p.name; $('#model-url').value = p.url; $('#model-id').value = p.modelId;
+    });
+    $('#model-form')?.addEventListener('submit', e => {
+        e.preventDefault();
+        const nm = addModel({ name: $('#model-name').value.trim(), url: $('#model-url').value.trim(), key: $('#model-key').value.trim(), modelId: $('#model-id').value.trim() });
+        if (getModels().length === 1) setActiveModel(nm.id);
+        refreshModelBar(); renderModelsList(); $('#add-model-modal').classList.add('hidden'); $('#model-form').reset(); showToast('模型已添加 ✓');
+    });
+}
+
+function openSettings() {
+    renderModelsList();
+    const s = getSettings();
+    $('#auto-speak').checked = s.autoSpeak; $('#save-history').checked = s.saveHistory; $('#default-rate').value = s.defaultRate;
+    $('#settings-modal').classList.remove('hidden');
+}
+function openAddModel() { $('#model-form').reset(); $('#add-model-modal').classList.remove('hidden'); }
+
+function renderModelsList() {
+    const models = getModels(), activeId = getActiveModelId(), el = $('#models-list');
+    if (!models.length) { el.innerHTML = '<p style="color:var(--text-light);text-align:center;padding:16px;font-size:14px">暂无模型，请添加</p>'; return; }
+    el.innerHTML = models.map(m => `
+        <div class="model-item ${m.id === activeId ? 'active-model' : ''}">
+            <div class="model-info"><h4>${m.name}${m.id === activeId ? ' ✓' : ''}</h4><p>${m.modelId}</p></div>
+            <div class="model-actions">
+                <button onclick="selModel('${m.id}')" title="使用">✓</button>
+                <button onclick="delModel('${m.id}')" title="删除">🗑</button>
+            </div>
+        </div>`).join('');
+}
+window.selModel = id => { setActiveModel(id); refreshModelBar(); renderModelsList(); showToast('已切换模型'); };
+window.delModel = id => { if (confirm('确定删除？')) { deleteModel(id); renderModelsList(); refreshModelBar(); } };
+
+// ---- 模型栏 ----
+function initModelBar() {
+    refreshModelBar();
+    $('#add-model-btn')?.addEventListener('click', openAddModel);
+    $('#model-select')?.addEventListener('change', e => setActiveModel(e.target.value || null));
+}
+function refreshModelBar() {
+    const models = getModels(), activeId = getActiveModelId(), sel = $('#model-select');
+    if (!sel) return;
+    sel.innerHTML = models.length ? '<option value="">选择模型...</option>' : '<option value="">暂无模型，点击 + 添加</option>';
+    models.forEach(m => { const o = document.createElement('option'); o.value = m.id; o.textContent = `${m.name} (${m.modelId})`; if (m.id === activeId) o.selected = true; sel.appendChild(o); });
+}
+
+// ---- 历史记录 ----
+function initHistory() {
+    $('#clear-history')?.addEventListener('click', () => { if (confirm('确定清空历史记录？')) { clearHistory(); renderHistory(); showToast('已清空'); } });
+}
+function renderHistory() {
+    const h = getHistory(), el = $('#history-list');
+    if (!el) return;
+    if (!h.length) { el.innerHTML = '<p class="empty-history">暂无历史记录</p>'; return; }
+    el.innerHTML = h.map(item => {
+        const t = new Date(item.timestamp).toLocaleString('zh-CN', { month:'2-digit', day:'2-digit', hour:'2-digit', minute:'2-digit' });
+        return `<div class="history-item" onclick="reuseHist('${item.id}')">
+            <div class="history-source">${item.source}</div>
+            <div class="history-result">${item.result}</div>
+            <div class="history-meta">${LANG_LABELS[item.sourceLang]||item.sourceLang} → ${LANG_LABELS[item.targetLang]||item.targetLang} · ${t}</div>
+        </div>`;
+    }).join('');
+}
+window.reuseHist = id => {
+    const item = getHistory().find(h => h.id === id); if (!item) return;
+    switchMode('text');
+    $('#input-text').value = item.source; $('#output-text').textContent = item.result;
+    $('#source-lang').value = item.sourceLang; $('#target-lang').value = item.targetLang;
+    $('.char-count').textContent = `${item.source.length} 字符`;
+};
+
+// ---- 首次配置向导 ----
+function initWizard() {
+    const wizard = $('#setup-wizard');
+    wizard.classList.remove('hidden');
+    let step = 0;
+    const totalSteps = 3;
+
+    function goTo(s) {
+        // update dots
+        for (let i = 0; i < totalSteps; i++) {
+            const dot = $(`#dot-${i}`);
+            dot.classList.remove('active', 'done');
+            if (i < s) dot.classList.add('done');
+            else if (i === s) dot.classList.add('active');
+        }
+        // update step panels
+        $$('.wizard-step').forEach(el => el.classList.remove('active'));
+        $(`#wstep-${s}`)?.classList.add('active');
+        // update buttons
+        const skipBtn = $('#wizard-skip');
+        const nextBtn = $('#wizard-next');
+        skipBtn.textContent = s === totalSteps - 1 ? '完成' : '跳过此步';
+        nextBtn.textContent = s === totalSteps - 1 ? '完成配置 ✓' : '下一步 →';
+        step = s;
+    }
+
+    function saveCurrentStep() {
+        if (step === 0) {
+            // 翻译模型
+            const url = $('#w-model-url').value.trim();
+            const key = $('#w-model-key').value.trim();
+            const id  = $('#w-model-id').value.trim();
+            if (url && key && id) {
+                // 清除旧的并添加新的
+                const existing = getModels();
+                if (existing.length === 0) {
+                    const nm = addModel({ name: 'PoloAI', url, key, modelId: id });
+                    setActiveModel(nm.id);
+                    refreshModelBar();
+                }
+            }
+        } else if (step === 1) {
+            // 讯飞
+            const appid  = $('#w-xf-appid').value.trim();
+            const apikey = $('#w-xf-apikey').value.trim();
+            const secret = $('#w-xf-secret').value.trim();
+            if (appid || apikey || secret) {
+                const cfg = getAsrConfig();
+                cfg.xfAppid = appid; cfg.xfApiKey = apikey; cfg.xfApiSecret = secret;
+                saveAsrConfig(cfg);
+            }
+        } else if (step === 2) {
+            // Groq
+            const gkey = $('#w-groq-key').value.trim();
+            if (gkey) {
+                const cfg = getAsrConfig();
+                cfg.groqKey = gkey;
+                saveAsrConfig(cfg);
+            }
+        }
+    }
+
+    function finish() {
+        saveCurrentStep();
+        markSetupDone();
+        wizard.classList.add('hidden');
+        refreshModelBar();
+        loadAsrSettingsUI();
+        showToast('配置完成！');
+    }
+
+    $('#wizard-next').addEventListener('click', () => {
+        saveCurrentStep();
+        if (step < totalSteps - 1) { goTo(step + 1); }
+        else { finish(); }
+    });
+
+    $('#wizard-skip').addEventListener('click', () => {
+        if (step < totalSteps - 1) { goTo(step + 1); }
+        else { finish(); }
+    });
+
+    goTo(0);
+}
+
+// ---- ASR 设置页 ----
+function loadAsrSettingsUI() {
+    const cfg = getAsrConfig();
+    const xfAppid  = $('#set-xf-appid');  if (xfAppid)  xfAppid.value  = cfg.xfAppid  || '';
+    const xfApiKey = $('#set-xf-apikey'); if (xfApiKey) xfApiKey.value = cfg.xfApiKey || '';
+    const xfSecret = $('#set-xf-secret'); if (xfSecret) xfSecret.value = cfg.xfApiSecret || '';
+    const groqKey  = $('#set-groq-key');  if (groqKey)  groqKey.value  = cfg.groqKey  || '';
+}
+
+function initAsrSettings() {
+    $('#save-asr-btn')?.addEventListener('click', () => {
+        const cfg = getAsrConfig();
+        cfg.xfAppid     = $('#set-xf-appid').value.trim();
+        cfg.xfApiKey    = $('#set-xf-apikey').value.trim();
+        cfg.xfApiSecret = $('#set-xf-secret').value.trim();
+        cfg.groqKey     = $('#set-groq-key').value.trim();
+        saveAsrConfig(cfg);
+        const status = $('#asr-save-status');
+        if (status) { status.textContent = '✅ 已保存'; setTimeout(() => status.textContent = '', 2000); }
+        showToast('语音识别配置已保存');
+    });
+}
+
+// ---- PWA安装 ----
+function initInstall() {
+    window.addEventListener('beforeinstallprompt', e => { e.preventDefault(); deferredInstall = e; $('#install-banner')?.classList.remove('hidden'); });
+    $('#install-btn')?.addEventListener('click', async () => { if (deferredInstall) { deferredInstall.prompt(); deferredInstall = null; $('#install-banner')?.classList.add('hidden'); } });
+    $('#dismiss-install')?.addEventListener('click', () => $('#install-banner')?.classList.add('hidden'));
+}
+
+// ---- Toast ----
+function showToast(msg, duration = 2500) {
+    const t = $('#toast'); if (!t) return;
+    t.textContent = msg; t.classList.remove('hidden');
+    clearTimeout(t._timer); t._timer = setTimeout(() => t.classList.add('hidden'), duration);
+}
+</script>
+</body>
+</html>
