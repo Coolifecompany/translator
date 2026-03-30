@@ -1,0 +1,69 @@
+## 开发方案
+
+### 技术架构
+| 模块 | 方案 |
+|------|------|
+| 前端框架 | 纯原生 HTML5 + CSS3 + JavaScript |
+| 数据存储 | LocalStorage（保存API配置，不出境） |
+| API协议 | OpenAI Compatible（流式SSE） |
+| 语音识别 | Web Speech API（浏览器原生） |
+| 语音合成 | Web Speech API（TTS） |
+| 部署 | GitHub Pages（静态托管） |
+
+### 核心功能设计
+
+**1. 模型配置管理**
+- 支持添加 N 个自定义模型
+- 每个模型：名称 + API URL + API Key + Model ID
+- 本地加密存储（简易base64，防误看）
+
+**2. 翻译模式**
+- 文本输入翻译
+- 按住说话 → 语音识别 → 翻译 → 语音朗读（全语音对话）
+
+**3. 语言支持**
+- 三语互翻：中↔英、中↔泰、英↔泰
+- 语言自动检测（可选）
+
+**4. UI 设计（移动优先）**
+- 简洁卡片式界面
+- 底部模型切换栏
+- 大按钮便于触控
+
+### 文件结构
+```
+translator/
+├── index.html      # 主页面
+├── css/
+│   └── style.css   # 样式
+├── js/
+│   ├── app.js      # 主逻辑
+│   ├── api.js      # API调用（流式）
+│   ├── speech.js   # 语音识别/合成
+│   └── config.js   # 配置管理
+└── README.md       # 使用说明
+```
+
+### API 调用逻辑（基于你的示例）
+```javascript
+// 流式请求，实时显示翻译结果
+fetch(url, {
+  method: 'POST',
+  headers: { 'Authorization': 'Bearer ' + apiKey },
+  body: JSON.stringify({
+    model: modelId,
+    messages: [...],
+    stream: true
+  })
+})
+// 使用 ReadableStream 逐字显示
+```
+
+### 语音识别兼容性
+- Chrome/Edge/Safari：原生支持
+- 泰语识别：依赖设备系统支持
+- Fallback：提示用户手动输入
+
+---
+
+**确认没问题我就开始写代码？** 大概15分钟完成。

@@ -1,0 +1,86 @@
+```json
+{
+  "project": {
+    "name": "AI翻译助手",
+    "description": "中英泰三语互译 + AI模型 + 语音识别",
+    "tech_stack": {
+      "frontend": ["HTML5", "CSS3", "Vanilla JavaScript"],
+      "deployment": "GitHub Pages",
+      "api_protocol": "OpenAI Compatible (SSE Streaming)"
+    }
+  },
+  "features": [
+    {
+      "id": "model_config",
+      "name": "模型配置管理",
+      "description": "支持多个AI模型，用户自行录入API信息",
+      "config_fields": ["provider_name", "api_url", "api_key", "model_id"],
+      "storage": "LocalStorage (Base64编码)",
+      "max_models": 10
+    },
+    {
+      "id": "translation",
+      "name": "翻译功能",
+      "modes": ["text_input", "voice_only"],
+      "language_pairs": [
+        {"from": "zh", "to": "en", "name": "中文→英语"},
+        {"from": "en", "to": "zh", "name": "英语→中文"},
+        {"from": "zh", "to": "th", "name": "中文→泰语"},
+        {"from": "th", "to": "zh", "name": "泰语→中文"},
+        {"from": "en", "to": "th", "name": "英语→泰语"},
+        {"from": "th", "to": "en", "name": "泰语→英语"}
+      ],
+      "stream_response": true
+    },
+    {
+      "id": "speech",
+      "name": "语音功能",
+      "recognition": {
+        "engine": "Web Speech API",
+        "languages": ["zh-CN", "en-US", "th-TH"],
+        "browser_support": "Chrome/Edge/Safari"
+      },
+      "synthesis": {
+        "engine": "Web Speech API",
+        "auto_speak_translated": true
+      }
+    }
+  ],
+  "file_structure": {
+    "translator/": {
+      "index.html": "主页面UI",
+      "css/style.css": "样式(移动优先)",
+      "js/": {
+        "config.js": "模型配置CRUD",
+        "api.js": "OpenAI流式API调用",
+        "speech.js": "语音识别与合成",
+        "app.js": "主逻辑与事件绑定"
+      },
+      "README.md": "部署与使用说明"
+    }
+  },
+  "api_request_format": {
+    "method": "POST",
+    "url": "用户配置",
+    "headers": {
+      "Authorization": "Bearer {api_key}",
+      "Content-Type": "application/json"
+    },
+    "body": {
+      "model": "{model_id}",
+      "messages": [
+        {"role": "system", "content": "翻译系统prompt"},
+        {"role": "user", "content": "待翻译文本"}
+      ],
+      "stream": true,
+      "temperature": 0.7,
+      "top_p": 1
+    },
+    "response_handler": "SSE流式逐字显示"
+  },
+  "security": {
+    "api_key_storage": "LocalStorage Base64",
+    "note": "纯前端无法实现真正加密，仅防误看"
+  }
+}
+```
