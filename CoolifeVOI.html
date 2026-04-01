@@ -1,0 +1,2172 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>CoolifeVO — AI 智能助手</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=IBM+Plex+Mono:wght@300;400;500;600&family=Noto+Sans+SC:wght@300;400;500;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#1a1a2e;--bg-g:linear-gradient(135deg,#1a1a2e 0%,#16213e 50%,#0f3460 100%);
+  --sf:rgba(255,255,255,.08);--sf2:rgba(255,255,255,.12);--sf3:rgba(255,255,255,.16);
+  --bd:rgba(255,255,255,.15);--bd2:rgba(255,255,255,.28);
+  --tx:#fff;--txd:rgba(255,255,255,.7);--txm:rgba(255,255,255,.45);
+  --ac:#6c5ce7;--acb:#a29bfe;--acg:rgba(108,92,231,.4);
+  --tl:#00d4aa;--tlg:rgba(0,212,170,.3);
+  --dg:#ff6b8a;--wn:#ffd166;
+  --gpt:#60a5fa;--gptd:rgba(96,165,250,.15);
+  --gem:#a78bfa;--gemd:rgba(167,139,250,.15);
+  --ops:#34d399;--opsd:rgba(52,211,153,.15);
+  --dsk:#fb7185;--dskd:rgba(251,113,133,.15);
+  --snt:#f59e0b;--sntd:rgba(245,158,11,.15);
+  --gmi:#38bdf8;--gmid:rgba(56,189,248,.15);
+  --ds3:#f472b6;--ds3d:rgba(244,114,182,.15);
+  --sys:#fbbf24;--sysd:rgba(251,191,36,.12);
+  --hh:52px;--bnh:62px;
+}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+html,body{height:100%;overflow:hidden;font-family:'Noto Sans SC',sans-serif}
+body{background:var(--bg-g);background-attachment:fixed;color:var(--tx);display:flex;flex-direction:column;font-size:16px;line-height:1.6}
+
+/* HEADER */
+header{position:fixed;top:0;left:0;right:0;z-index:100;display:flex;align-items:center;justify-content:space-between;padding:0 16px;height:var(--hh);background:rgba(26,26,46,.95);backdrop-filter:blur(20px);border-bottom:1px solid var(--bd)}
+.logo{font-family:'Syne',sans-serif;font-weight:800;font-size:17px;letter-spacing:.1em;display:flex;align-items:center;gap:8px}
+.lm{width:30px;height:30px;border-radius:9px;background:linear-gradient(135deg,var(--ac),var(--acb));display:flex;align-items:center;justify-content:center;font-size:14px;box-shadow:0 4px 15px var(--acg)}
+.hbadge{font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--acb);background:var(--sf);border:1px solid var(--bd);border-radius:6px;padding:4px 10px;white-space:nowrap}
+.hbadge.tl{color:var(--tl);border-color:rgba(0,212,170,.3);background:rgba(0,212,170,.08)}
+.hbtn{display:flex;align-items:center;gap:4px;padding:5px 10px;border-radius:7px;border:1px solid var(--bd);background:var(--sf);color:var(--txd);font-family:'IBM Plex Mono',monospace;font-size:11px;cursor:pointer;transition:all .2s;white-space:nowrap}
+.hbtn:hover{border-color:var(--bd2);color:var(--tx)}
+.hbtn.on{border-color:var(--tl);color:var(--tl)}
+.hr{display:flex;align-items:center;gap:8px}
+
+/* LAYOUT */
+.layout{display:flex;flex:1;margin-top:var(--hh);overflow:hidden}
+
+/* SIDEBAR */
+.sidebar{width:256px;flex-shrink:0;display:flex;flex-direction:column;border-right:1px solid var(--bd);background:var(--sf);overflow-y:auto;padding:14px}
+.sidebar::-webkit-scrollbar{width:4px}
+.sidebar::-webkit-scrollbar-thumb{background:var(--bd);border-radius:2px}
+.sec{margin-bottom:18px}
+.sl{font-family:'IBM Plex Mono',monospace;font-size:11px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--txm);margin-bottom:10px;display:flex;align-items:center;justify-content:space-between}
+.cfgl{background:none;border:none;color:var(--acb);font-family:'IBM Plex Mono',monospace;font-size:10px;cursor:pointer;padding:0}
+/* model cards sidebar */
+.mc{display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:10px;border:1px solid transparent;cursor:pointer;margin-bottom:6px;transition:all .25s;background:var(--sf2)}
+.mc:hover{background:var(--sf3);border-color:var(--bd2)}
+.mc[data-m=gpt].sel{border-color:var(--gpt);background:var(--gptd)}
+.mc[data-m=gemini].sel{border-color:var(--gem);background:var(--gemd)}
+.mc[data-m=opus].sel{border-color:var(--ops);background:var(--opsd)}
+.mc[data-m=deepseek].sel{border-color:var(--dsk);background:var(--dskd)}
+.mc[data-m=sonnet].sel{border-color:var(--snt);background:var(--sntd)}
+.mc[data-m=gptmini].sel{border-color:var(--gmi);background:var(--gmid)}
+.mc[data-m=ds32].sel{border-color:var(--ds3);background:var(--ds3d)}
+.mc-p{width:10px;height:10px;border-radius:50%;flex-shrink:0}
+.mc-t{flex:1;min-width:0}
+.mc-n{font-size:13px;font-weight:600}
+.mc-r{font-size:11px;color:var(--txd);margin-top:1px}
+.mc-c{width:20px;height:20px;border-radius:5px;border:2px solid var(--bd2);display:flex;align-items:center;justify-content:center;font-size:11px;flex-shrink:0;transition:all .25s}
+.mc.sel .mc-c{background:var(--ac);border-color:var(--ac);box-shadow:0 0 10px var(--acg)}
+/* sidebar stats */
+.stg{display:flex;flex-direction:column;gap:6px}
+.str{display:flex;justify-content:space-between;align-items:center;font-family:'IBM Plex Mono',monospace;font-size:11px}
+.stk{color:var(--txm)}
+.stv{color:var(--acb);font-weight:600}
+.stv.g{color:var(--tl)}
+.cbar{height:4px;border-radius:2px;background:var(--sf3);overflow:hidden;margin-top:8px}
+.cbarf{height:100%;border-radius:2px;background:linear-gradient(90deg,var(--ac),var(--tl));transition:width 1s ease}
+
+/* MAIN */
+.main{flex:1;display:flex;flex-direction:column;min-width:0;overflow:hidden}
+
+/* SETUP SCREEN */
+#setupSc{flex:1;display:flex;flex-direction:column;align-items:center;padding:28px 20px;overflow-y:auto}
+.si{width:100%;max-width:600px}
+.seye{font-family:'IBM Plex Mono',monospace;font-size:11px;font-weight:600;letter-spacing:.14em;text-transform:uppercase;color:var(--tl);margin-bottom:8px}
+.stit{font-family:'Syne',sans-serif;font-size:24px;font-weight:800;letter-spacing:.03em;line-height:1.2;margin-bottom:6px}
+.ssub{font-size:13px;color:var(--txd);margin-bottom:24px;line-height:1.7}
+.slbl{font-family:'IBM Plex Mono',monospace;font-size:11px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--txm);margin-bottom:8px}
+/* app mode cards */
+.amr{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-bottom:24px}
+.amc{padding:16px;border-radius:14px;border:1px solid var(--bd);background:var(--sf2);cursor:pointer;transition:all .25s;text-align:center;user-select:none}
+.amc:hover{border-color:var(--bd2);background:var(--sf3)}
+.amc.sel{border-color:var(--ac);background:rgba(108,92,231,.1)}
+.amc.sel.tl{border-color:var(--tl);background:rgba(0,212,170,.08)}
+.amic{font-size:26px;display:block;margin-bottom:6px}
+.amn{font-family:'Syne',sans-serif;font-size:14px;font-weight:700;display:block;margin-bottom:3px}
+.amd{font-size:11px;color:var(--txm);line-height:1.5;display:block}
+/* model grid setup */
+.mg{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:7px;margin-bottom:22px}
+.sgc{display:flex;align-items:center;gap:9px;padding:11px 12px;border-radius:10px;border:1px solid var(--bd);background:var(--sf2);cursor:pointer;transition:all .25s;user-select:none}
+.sgc:hover{background:var(--sf3);border-color:var(--bd2)}
+.sgc.sel[data-m=gpt]{border-color:var(--gpt);background:var(--gptd)}
+.sgc.sel[data-m=gemini]{border-color:var(--gem);background:var(--gemd)}
+.sgc.sel[data-m=opus]{border-color:var(--ops);background:var(--opsd)}
+.sgc.sel[data-m=deepseek]{border-color:var(--dsk);background:var(--dskd)}
+.sgc.sel[data-m=sonnet]{border-color:var(--snt);background:var(--sntd)}
+.sgc.sel[data-m=gptmini]{border-color:var(--gmi);background:var(--gmid)}
+.sgc.sel[data-m=ds32]{border-color:var(--ds3);background:var(--ds3d)}
+.sp{width:9px;height:9px;border-radius:50%;flex-shrink:0}
+.si2{flex:1}.sn{font-size:13px;font-weight:600}.sr{font-size:11px;color:var(--txd);margin-top:1px}
+.sc{width:18px;height:18px;border-radius:4px;border:2px solid var(--bd2);display:flex;align-items:center;justify-content:center;font-size:10px;flex-shrink:0;transition:all .25s}
+.sgc.sel .sc{background:var(--ac);border-color:var(--ac);box-shadow:0 0 8px var(--acg)}
+/* topic input */
+.tinp{width:100%;background:var(--sf2);border:1px solid var(--bd);border-radius:10px;padding:13px 15px;font-family:'Noto Sans SC',sans-serif;font-size:15px;color:var(--tx);outline:none;resize:none;min-height:75px;line-height:1.6;transition:border-color .2s;margin-bottom:18px}
+.tinp:focus{border-color:var(--ac);box-shadow:0 0 0 3px rgba(108,92,231,.12)}
+.tinp::placeholder{color:var(--txm)}
+/* run mode */
+.rmr{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:22px}
+.rmb{padding:12px 8px;border-radius:10px;border:1px solid var(--bd);background:var(--sf2);color:var(--txd);cursor:pointer;font-family:'IBM Plex Mono',monospace;font-size:11px;text-align:center;transition:all .25s;line-height:1.4}
+.rmb:hover{border-color:var(--bd2);color:var(--tx)}
+.rmb.active{border-color:var(--ac);color:var(--acb);background:rgba(108,92,231,.1)}
+.rmb.active.tl{border-color:var(--tl);color:var(--tl);background:rgba(0,212,170,.08)}
+.rmi{font-size:17px;display:block;margin-bottom:3px}
+.rmn{font-weight:600;display:block}
+.rmd{font-size:10px;color:var(--txm);margin-top:2px;display:block}
+/* start button */
+.stbtn{width:100%;padding:15px;border-radius:12px;border:none;background:linear-gradient(135deg,var(--ac),#8b7bf0);color:white;font-family:'Syne',sans-serif;font-size:16px;font-weight:700;letter-spacing:.06em;cursor:pointer;transition:all .3s;box-shadow:0 6px 25px rgba(108,92,231,.4)}
+.stbtn:hover{transform:translateY(-2px);box-shadow:0 10px 30px rgba(108,92,231,.5)}
+.stnote{text-align:center;margin-top:8px;font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--txm)}
+
+/* 1v1 CHAT SCREEN */
+#chatSc{flex:1;display:none;flex-direction:column;overflow:hidden}
+.pbar{display:flex;align-items:center;gap:10px;padding:9px 18px;background:rgba(0,0,0,.2);border-bottom:1px solid var(--bd);flex-shrink:0}
+.pav{width:34px;height:34px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:700;font-family:'Syne',sans-serif;flex-shrink:0}
+.pi{flex:1;min-width:0}
+.pn{font-family:'IBM Plex Mono',monospace;font-size:11px;font-weight:600;letter-spacing:.08em;text-transform:uppercase}
+.pr{font-size:12px;color:var(--txd);margin-top:1px}
+.pacts{display:flex;gap:6px;flex-wrap:wrap}
+.pab{display:flex;align-items:center;gap:4px;padding:6px 11px;border-radius:8px;border:1px solid var(--bd);background:var(--sf2);color:var(--txd);font-family:'IBM Plex Mono',monospace;font-size:11px;cursor:pointer;transition:all .2s;white-space:nowrap}
+.pab:hover{border-color:var(--bd2);color:var(--tx)}
+.pab.von{border-color:var(--tl);color:var(--tl)}
+.pab.back:hover{border-color:var(--dg);color:var(--dg)}
+/* messages */
+.msgs{flex:1;overflow-y:auto;padding:18px 22px;display:flex;flex-direction:column;gap:14px}
+.msgs::-webkit-scrollbar{width:5px}
+.msgs::-webkit-scrollbar-thumb{background:var(--bd);border-radius:3px}
+.emp{display:flex;flex-direction:column;align-items:center;justify-content:center;flex:1;gap:10px;opacity:.4;user-select:none;text-align:center}
+.emp-i{font-size:34px}
+.emp-t{font-family:'Syne',sans-serif;font-size:15px;font-weight:700;color:var(--txd);letter-spacing:.06em}
+.emp-s{font-size:12px;color:var(--txm);max-width:260px;line-height:1.7;font-family:'IBM Plex Mono',monospace}
+.mw{display:flex;justify-content:flex-end}
+.mu{max-width:76%;background:linear-gradient(135deg,var(--ac),#8b7bf0);color:white;padding:10px 14px;border-radius:14px 14px 4px 14px;font-size:14px;line-height:1.6;box-shadow:0 4px 20px rgba(108,92,231,.3);white-space:pre-wrap;word-break:break-word}
+.mg2{display:flex;flex-direction:column;gap:3px}
+.ml{font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:.08em;text-transform:uppercase;font-weight:600;margin-bottom:2px;display:flex;align-items:center;gap:8px}
+.spkb{background:none;border:none;cursor:pointer;padding:2px;border-radius:4px;transition:opacity .2s;display:flex;align-items:center;opacity:.6}
+.spkb:hover{opacity:1}
+.mb{padding:12px 15px;border-radius:4px 14px 14px 14px;font-size:13.5px;line-height:1.75;border:1px solid transparent;white-space:pre-wrap;word-break:break-word}
+.mb .bt{color:var(--tx)}
+.fm-gpt{color:var(--gpt);border-color:rgba(96,165,250,.2);background:var(--gptd)}
+.fm-gemini{color:var(--gem);border-color:rgba(167,139,250,.2);background:var(--gemd)}
+.fm-opus{color:var(--ops);border-color:rgba(52,211,153,.2);background:var(--opsd)}
+.fm-deepseek{color:var(--dsk);border-color:rgba(251,113,133,.2);background:var(--dskd)}
+.fm-sonnet{color:var(--snt);border-color:rgba(245,158,11,.2);background:var(--sntd)}
+.fm-gptmini{color:var(--gmi);border-color:rgba(56,189,248,.2);background:var(--gmid)}
+.fm-ds32{color:var(--ds3);border-color:rgba(244,114,182,.2);background:var(--ds3d)}
+.td{display:inline-flex;gap:4px;align-items:center;padding:2px 0}
+.td span{width:5px;height:5px;border-radius:50%;background:currentColor;opacity:.4;animation:dp 1.4s infinite}
+.td span:nth-child(2){animation-delay:.2s}
+.td span:nth-child(3){animation-delay:.4s}
+@keyframes dp{0%,80%,100%{opacity:.2;transform:scale(.8)}40%{opacity:1;transform:scale(1)}}
+/* input bar */
+.ia{padding:9px 15px 11px;border-top:1px solid var(--bd);background:rgba(8,8,16,.8);backdrop-filter:blur(20px);flex-shrink:0}
+.iw{display:flex;gap:7px;align-items:flex-end;background:var(--sf);border:1px solid var(--bd);border-radius:12px;padding:6px 7px 6px 11px;transition:border-color .2s}
+.iw:focus-within{border-color:var(--ac);box-shadow:0 0 0 3px rgba(108,92,231,.1)}
+#ci{flex:1;background:none;border:none;outline:none;color:var(--tx);font-family:'Noto Sans SC',sans-serif;font-size:14px;resize:none;min-height:22px;max-height:130px;line-height:1.5;padding:3px 0}
+#ci::placeholder{color:var(--txm)}
+#trInput{flex:1;background:none;border:none;outline:none;color:var(--tx);font-family:'Noto Sans SC',sans-serif;font-size:14px;resize:none;min-height:22px;max-height:130px;line-height:1.5;padding:3px 0}
+#trInput::placeholder{color:var(--txm)}
+.sbtn2{width:35px;height:35px;border-radius:9px;border:none;background:var(--ac);color:white;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:all .2s;box-shadow:0 4px 14px var(--acg)}
+.sbtn2:hover{transform:translateY(-1px);box-shadow:0 6px 20px var(--acg)}
+.sbtn2:disabled{opacity:.4;cursor:not-allowed;transform:none}
+.micb{width:35px;height:35px;border-radius:9px;border:none;background:var(--sf2);color:var(--txd);cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:all .2s}
+.micb:hover{background:var(--sf3);color:var(--tx)}
+.micb.rec{background:var(--dg);color:white;animation:pr 1.5s infinite}
+@keyframes pr{0%,100%{box-shadow:0 0 0 0 rgba(255,107,138,.7)}50%{box-shadow:0 0 0 10px rgba(255,107,138,0)}}
+.stopb{width:35px;height:35px;border-radius:9px;border:none;background:var(--dg);color:white;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;animation:ps 1s infinite}
+@keyframes ps{0%,100%{opacity:1}50%{opacity:.7}}
+.im{display:flex;align-items:center;justify-content:space-between;margin-top:5px;padding:0 2px;font-family:'IBM Plex Mono',monospace;font-size:10px;color:var(--txm)}
+
+/* DISCUSSION SCREEN */
+#discSc{flex:1;display:none;flex-direction:column;overflow:hidden}
+.gbar{display:flex;align-items:center;gap:10px;padding:9px 18px;background:rgba(0,212,170,.05);border-bottom:1px solid rgba(0,212,170,.2);flex-shrink:0}
+.gav{width:34px;height:34px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:700;font-family:'Syne',sans-serif;flex-shrink:0}
+.ginfo{flex:1;min-width:0}
+.gn{font-family:'IBM Plex Mono',monospace;font-size:11px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;display:flex;align-items:center;gap:7px}
+.gtag{font-size:9px;font-weight:700;padding:2px 7px;border-radius:4px;text-transform:uppercase;background:rgba(0,212,170,.15);color:var(--tl);border:1px solid rgba(0,212,170,.25)}
+.gt{font-size:12px;color:var(--txd);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-top:1px}
+.rpill{font-family:'IBM Plex Mono',monospace;font-size:11px;font-weight:600;color:var(--acb);background:rgba(108,92,231,.12);border:1px solid rgba(108,92,231,.2);border-radius:20px;padding:4px 11px;white-space:nowrap;flex-shrink:0}
+.rpbar{display:flex;align-items:center;gap:7px;padding:5px 18px;background:rgba(0,0,0,.2);border-bottom:1px solid var(--bd);flex-shrink:0}
+.rpl{font-family:'IBM Plex Mono',monospace;font-size:10px;color:var(--txm)}
+.rpd{display:flex;gap:4px;align-items:center}
+.rpdot{width:8px;height:8px;border-radius:50%;background:var(--sf3);transition:all .3s}
+.rpdot.done{background:var(--ac);box-shadow:0 0 6px var(--acg)}
+.rpdot.act{background:var(--tl);box-shadow:0 0 8px var(--tlg);animation:dpa 1s infinite}
+@keyframes dpa{0%,100%{opacity:1}50%{opacity:.5}}
+.dms{flex:1;overflow-y:auto;padding:18px 22px;display:flex;flex-direction:column;gap:14px}
+.dms::-webkit-scrollbar{width:5px}
+.dms::-webkit-scrollbar-thumb{background:var(--bd);border-radius:3px}
+.rh{display:flex;align-items:center;gap:10px;margin:3px 0}
+.rl{flex:1;height:1px;background:var(--bd)}
+.rp2{font-family:'IBM Plex Mono',monospace;font-size:10px;font-weight:600;letter-spacing:.12em;text-transform:uppercase;color:var(--txm);padding:3px 11px;background:var(--sf2);border:1px solid var(--bd);border-radius:20px;white-space:nowrap;flex-shrink:0}
+.hm{display:flex;align-items:flex-start;gap:9px}
+.hp{width:26px;height:26px;border-radius:7px;flex-shrink:0;background:var(--gptd);border:1px solid rgba(96,165,250,.3);display:flex;align-items:center;justify-content:center;font-size:12px}
+.hb{flex:1;padding:9px 13px;border-radius:4px 11px 11px 11px;background:var(--sysd);border:1px solid rgba(251,191,36,.15);font-size:12px;color:var(--sys);line-height:1.6;font-family:'IBM Plex Mono',monospace}
+.gcr{font-size:9px;background:rgba(0,212,170,.15);color:var(--tl);border:1px solid rgba(0,212,170,.25);border-radius:4px;padding:1px 7px;font-weight:700;letter-spacing:.06em}
+.ab{display:inline-flex;align-items:center;font-family:'IBM Plex Mono',monospace;font-size:9px;font-weight:700;padding:2px 7px;border-radius:4px;letter-spacing:.06em;text-transform:uppercase}
+.ab-s{background:rgba(52,211,153,.12);color:#34d399;border:1px solid rgba(52,211,153,.2)}
+.ab-c{background:rgba(251,191,36,.12);color:#fbbf24;border:1px solid rgba(251,191,36,.2)}
+.ab-o{background:rgba(251,113,133,.12);color:#fb7185;border:1px solid rgba(251,113,133,.2)}
+.ab-r{background:rgba(167,139,250,.12);color:#a78bfa;border:1px solid rgba(167,139,250,.2)}
+/* stage report */
+.rptc{border:1px solid rgba(108,92,231,.3);background:rgba(108,92,231,.06);border-radius:14px;overflow:hidden;animation:fu .4s ease}
+@keyframes fu{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+.rpth{display:flex;align-items:center;justify-content:space-between;padding:11px 15px;cursor:pointer;border-bottom:1px solid rgba(108,92,231,.2);background:rgba(108,92,231,.08)}
+.rpthl{display:flex;align-items:center;gap:9px}
+.rptiv{width:26px;height:26px;border-radius:7px;background:var(--ac);display:flex;align-items:center;justify-content:center;font-size:12px;box-shadow:0 0 10px var(--acg)}
+.rptt{font-family:'Syne',sans-serif;font-size:13px;font-weight:700}
+.rpts{font-family:'IBM Plex Mono',monospace;font-size:10px;color:var(--txm);margin-top:1px}
+.rpttg{font-family:'IBM Plex Mono',monospace;font-size:10px;color:var(--txd)}
+.rptb{padding:15px;display:flex;flex-direction:column;gap:11px}
+.rptb.col{display:none}
+.rsect{font-family:'IBM Plex Mono',monospace;font-size:10px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--txm);margin-bottom:5px}
+.tags{display:flex;flex-wrap:wrap;gap:5px}
+.tag{font-size:12px;padding:3px 9px;border-radius:6px;background:var(--sf2);border:1px solid var(--bd);color:var(--txd);line-height:1.4}
+.tag.con{background:rgba(52,211,153,.1);border-color:rgba(52,211,153,.2);color:var(--ops)}
+.tag.dv{background:rgba(251,113,133,.1);border-color:rgba(251,113,133,.2);color:var(--dsk)}
+.tag.nw{background:rgba(108,92,231,.1);border-color:rgba(108,92,231,.2);color:var(--acb)}
+.cbw{margin-top:3px}
+.cbl{display:flex;justify-content:space-between;font-family:'IBM Plex Mono',monospace;font-size:11px;margin-bottom:5px}
+.cbt{height:6px;border-radius:3px;background:var(--sf3);overflow:hidden}
+.cbf{height:100%;border-radius:3px;background:linear-gradient(90deg,var(--ac),var(--tl));transition:width 1.2s ease}
+.corrl{display:flex;flex-direction:column;gap:5px}
+.corri{font-size:12px;color:var(--txd);padding:6px 9px;background:var(--sf2);border-radius:6px;border-left:2px solid #a78bfa;line-height:1.5}
+.rptrec{font-size:13px;color:var(--txd);padding:9px 13px;background:var(--sf2);border-radius:8px;border-left:3px solid var(--tl);line-height:1.6}
+/* conv alert */
+.ca{display:flex;align-items:center;gap:11px;padding:11px 15px;background:rgba(0,212,170,.08);border:1px solid rgba(0,212,170,.25);border-radius:12px;animation:fu .4s ease}
+.caeb{padding:7px 13px;border-radius:8px;border:1px solid var(--tl);background:rgba(0,212,170,.1);color:var(--tl);font-family:'IBM Plex Mono',monospace;font-size:12px;font-weight:600;cursor:pointer;transition:all .2s;white-space:nowrap;flex-shrink:0}
+.caeb:hover{background:rgba(0,212,170,.2)}
+/* ctrl bar */
+.cb{display:flex;gap:7px;padding:11px 18px;background:rgba(8,8,16,.9);backdrop-filter:blur(20px);border-top:1px solid var(--bd);flex-shrink:0}
+.cbt2{flex:1;padding:9px 6px;border-radius:10px;border:1px solid var(--bd);background:var(--sf2);color:var(--txd);font-family:'IBM Plex Mono',monospace;font-size:11px;font-weight:600;cursor:pointer;transition:all .2s;display:flex;flex-direction:column;align-items:center;gap:2px;line-height:1.3}
+.cbt2 .ci{font-size:14px}
+.cbt2:hover{border-color:var(--bd2);color:var(--tx)}
+.cbt2.pri{border-color:var(--ac);color:var(--acb);background:rgba(108,92,231,.1)}
+.cbt2.tl{border-color:var(--tl);color:var(--tl);background:rgba(0,212,170,.08)}
+.cbt2.dg{border-color:var(--dg);color:var(--dg);background:rgba(255,107,138,.08)}
+.cbt2:disabled{opacity:.35;cursor:not-allowed}
+.cbt2.aon{border-color:var(--tl);background:rgba(0,212,170,.15);color:var(--tl);animation:ap 2s infinite}
+@keyframes ap{0%,100%{box-shadow:0 0 0 0 rgba(0,212,170,0)}50%{box-shadow:0 0 0 5px rgba(0,212,170,.1)}}
+.sysm{font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--txm);padding:2px;text-align:center}
+
+/* SUMMARY SCREEN */
+#sumSc{flex:1;display:none;overflow-y:auto;padding:22px}
+.sumi{max-width:700px;margin:0 auto}
+.sumh{display:flex;align-items:center;gap:13px;margin-bottom:22px;padding-bottom:15px;border-bottom:1px solid var(--bd)}
+.sumico{width:46px;height:46px;border-radius:13px;background:linear-gradient(135deg,var(--ac),var(--tl));display:flex;align-items:center;justify-content:center;font-size:20px;box-shadow:0 6px 20px rgba(108,92,231,.3)}
+.sumt{font-family:'Syne',sans-serif;font-size:21px;font-weight:800;letter-spacing:.04em}
+.summ{font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--txm);margin-top:3px}
+.sumsec{margin-bottom:13px;padding:15px;border-radius:12px;background:var(--sf2);border:1px solid var(--bd)}
+.suml{display:flex;align-items:center;gap:7px;font-family:'IBM Plex Mono',monospace;font-size:10px;font-weight:600;letter-spacing:.12em;text-transform:uppercase;color:var(--txm);margin-bottom:7px}
+.sumlnum{width:19px;height:19px;border-radius:5px;background:var(--ac);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700}
+.sumc{font-size:14px;color:var(--txd);line-height:1.75;white-space:pre-wrap;word-break:break-word}
+.sumc.hi{color:var(--tx)}
+.suma{display:flex;gap:9px;margin-top:20px}
+.sumab{padding:11px 18px;border-radius:10px;border:1px solid var(--bd);background:var(--sf2);color:var(--txd);font-family:'IBM Plex Mono',monospace;font-size:12px;font-weight:600;cursor:pointer;transition:all .2s}
+.sumab:hover{border-color:var(--bd2);color:var(--tx)}
+.sumab.pri{border-color:var(--ac);color:var(--acb);background:rgba(108,92,231,.1)}
+
+/* TRANSLATION SCREEN */
+#transSc{flex:1;display:none;flex-direction:column;overflow:hidden}
+.trbar{display:flex;align-items:center;gap:10px;padding:9px 18px;background:rgba(255,107,138,.05);border-bottom:1px solid rgba(255,107,138,.2);flex-shrink:0}
+.trav{width:34px;height:34px;border-radius:10px;background:rgba(255,107,138,.15);border:1px solid rgba(255,107,138,.3);display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0}
+.trinfo{flex:1;min-width:0}
+.trn{font-family:'IBM Plex Mono',monospace;font-size:11px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;display:flex;align-items:center;gap:7px}
+.trtag{font-size:9px;font-weight:700;padding:2px 7px;border-radius:4px;text-transform:uppercase;background:rgba(255,107,138,.15);color:var(--dg);border:1px solid rgba(255,107,138,.25)}
+.trsub{font-size:12px;color:var(--txd);margin-top:1px}
+.trmsgs{flex:1;overflow-y:auto;padding:18px 22px;display:flex;flex-direction:column;gap:16px}
+.trmsgs::-webkit-scrollbar{width:5px}
+.trmsgs::-webkit-scrollbar-thumb{background:var(--bd);border-radius:3px}
+.tr-emp{display:flex;flex-direction:column;align-items:center;justify-content:center;flex:1;gap:10px;opacity:.4;user-select:none;text-align:center}
+.tr-pair{animation:fu .4s ease}
+.tr-src{padding:10px 14px;border-radius:12px 12px 4px 12px;font-size:14px;line-height:1.7;max-width:85%;align-self:flex-end;white-space:pre-wrap;word-break:break-word}
+.tr-src.zh{background:linear-gradient(135deg,var(--ac),#8b7bf0);color:white;box-shadow:0 4px 15px rgba(108,92,231,.3)}
+.tr-src.th{background:linear-gradient(135deg,var(--dg),#e05070);color:white;box-shadow:0 4px 15px rgba(255,107,138,.3)}
+.tr-lbl{font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:.06em;font-weight:600;margin-top:6px}
+.tr-lbl.zh{color:var(--acb);text-align:right}
+.tr-lbl.th{color:var(--dg)}
+.tr-dst{padding:12px 15px;border-radius:4px 12px 12px 12px;font-size:15px;line-height:1.8;max-width:85%;align-self:flex-start;white-space:pre-wrap;word-break:break-word;border:1px solid transparent}
+.tr-dst.th{background:rgba(255,107,138,.1);border-color:rgba(255,107,138,.2);color:var(--tx)}
+.tr-dst.zh{background:rgba(108,92,231,.1);border-color:rgba(108,92,231,.2);color:var(--tx)}
+.tr-spk{background:none;border:none;cursor:pointer;padding:3px;border-radius:4px;opacity:.5;transition:opacity .2s;display:inline-flex;align-items:center;vertical-align:middle;margin-left:6px}
+.tr-spk:hover{opacity:1}
+.tr-dir{display:flex;align-items:center;gap:8px;font-family:'IBM Plex Mono',monospace;font-size:12px;color:var(--txd)}
+.tr-dir-arrow{color:var(--dg);font-size:16px;animation:arrowPulse 2s infinite}
+@keyframes arrowPulse{0%,100%{opacity:.5}50%{opacity:1}}
+.amc.sel.dg{border-color:var(--dg);background:rgba(255,107,138,.08)}
+
+/* VOICE OVERLAY */
+.vco{position:fixed;inset:0;z-index:300;background:var(--bg-g);display:none;flex-direction:column;overflow:hidden}
+.vco.open{display:flex}
+.vch{display:flex;align-items:center;justify-content:space-between;padding:13px 19px;border-bottom:1px solid var(--bd);background:rgba(26,26,46,.95);backdrop-filter:blur(20px);flex-shrink:0}
+.vct{display:flex;align-items:center;gap:9px;font-family:'Syne',sans-serif;font-weight:700;font-size:15px;letter-spacing:.08em}
+.vcm{width:28px;height:28px;border-radius:8px;background:linear-gradient(135deg,var(--tl),var(--acb));display:flex;align-items:center;justify-content:center;font-size:13px;box-shadow:0 4px 15px var(--tlg)}
+.vccl{background:var(--sf2);border:1px solid var(--bd);color:var(--txd);font-family:'IBM Plex Mono',monospace;font-size:11px;border-radius:7px;padding:6px 11px;cursor:pointer;transition:all .2s}
+.vccl:hover{border-color:var(--dg);color:var(--dg)}
+.vcmtag{font-family:'IBM Plex Mono',monospace;font-size:11px;font-weight:600;padding:4px 9px;border-radius:6px}
+.vcbd{flex:1;display:flex;flex-direction:column;overflow:hidden;padding:18px 18px 0;gap:14px}
+.vcaw{display:flex;flex-direction:column;align-items:center;gap:13px;flex-shrink:0}
+.vcav{width:88px;height:88px;border-radius:50%;border:2px solid var(--bd2);background:var(--sf2);display:flex;align-items:center;justify-content:center;color:var(--txd);transition:all .4s;font-size:30px;font-family:'Syne',sans-serif;font-weight:800}
+.vcav.ais{border-color:var(--tl);box-shadow:0 0 0 6px rgba(0,212,170,.15),0 0 0 12px rgba(0,212,170,.07);color:var(--tl);animation:vcp 2s infinite}
+.vcav.us{border-color:var(--acb);animation:vcpu 1s infinite}
+@keyframes vcp{0%,100%{box-shadow:0 0 0 4px rgba(0,212,170,.2),0 0 0 8px rgba(0,212,170,.07)}50%{box-shadow:0 0 0 8px rgba(0,212,170,.3),0 0 0 16px rgba(0,212,170,.1)}}
+@keyframes vcpu{0%,100%{box-shadow:0 0 0 4px rgba(162,155,254,.2),0 0 0 8px rgba(162,155,254,.07)}50%{box-shadow:0 0 0 8px rgba(162,155,254,.3),0 0 0 16px rgba(162,155,254,.1)}}
+.vcst{font-family:'IBM Plex Mono',monospace;font-size:12px;color:var(--txm);text-align:center;letter-spacing:.04em;min-height:18px}
+.vctr{flex:1;overflow-y:auto;display:flex;flex-direction:column;gap:11px;padding-bottom:7px}
+.vctr::-webkit-scrollbar{width:3px}
+.vctr::-webkit-scrollbar-thumb{background:var(--bd);border-radius:2px}
+.vcem{font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--txm);text-align:center;margin:auto;opacity:.5}
+.vcl{display:flex;flex-direction:column;gap:3px}
+.vcll{font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:.06em;font-weight:600}
+.vcl.user .vcll{color:var(--acb);text-align:right}
+.vcl.ai .vcll{color:var(--tl)}
+.vclt{font-size:14px;line-height:1.6;padding:9px 13px;border-radius:11px;max-width:90%;white-space:pre-wrap;word-break:break-word}
+.vcl.user .vclt{align-self:flex-end;background:linear-gradient(135deg,var(--ac),#8b7bf0);color:white;border-radius:14px 14px 4px 14px}
+.vcl.ai .vclt{align-self:flex-start;background:var(--sf2);border:1px solid var(--bd);color:var(--tx);border-radius:4px 14px 14px 14px}
+.vcft{flex-shrink:0;display:flex;flex-direction:column;align-items:center;gap:9px;padding:15px 18px 26px;border-top:1px solid var(--bd);background:rgba(8,8,16,.6)}
+.vcw{display:flex;align-items:center;gap:4px;height:24px;opacity:0;transition:opacity .3s}
+.vcw.act{opacity:1}
+.vcw span{width:4px;border-radius:2px;background:var(--tl);animation:wb 1s infinite ease-in-out}
+.vcw span:nth-child(1){animation-delay:0s;height:8px}
+.vcw span:nth-child(2){animation-delay:.1s;height:16px}
+.vcw span:nth-child(3){animation-delay:.2s;height:22px}
+.vcw span:nth-child(4){animation-delay:.3s;height:16px}
+.vcw span:nth-child(5){animation-delay:.4s;height:8px}
+@keyframes wb{0%,100%{transform:scaleY(.4);opacity:.6}50%{transform:scaleY(1);opacity:1}}
+.vcw.user span{background:var(--acb)}
+.vcmic{width:72px;height:72px;border-radius:50%;border:2px solid var(--bd2);background:var(--sf2);color:var(--txd);cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .3s;box-shadow:0 4px 20px rgba(0,0,0,.3)}
+.vcmic:hover{border-color:var(--acb);color:var(--acb);transform:scale(1.05)}
+.vcmic.ls{border-color:var(--acb);background:rgba(162,155,254,.15);color:var(--acb);animation:mip 1.2s infinite}
+.vcmic.at{border-color:var(--tl);background:rgba(0,212,170,.1);color:var(--tl)}
+@keyframes mip{0%,100%{box-shadow:0 0 0 0 rgba(162,155,254,.5)}50%{box-shadow:0 0 0 14px rgba(162,155,254,0)}}
+.vchi{font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--txm);letter-spacing:.04em;min-height:16px;text-align:center}
+
+/* MODAL */
+.mo{position:fixed;inset:0;background:rgba(8,8,16,.8);backdrop-filter:blur(8px);z-index:200;display:none;align-items:center;justify-content:center}
+.mo.open{display:flex}
+.mod{background:rgba(26,26,46,.98);border:1px solid var(--bd2);border-radius:14px;padding:18px;width:480px;max-width:92vw;max-height:85vh;overflow-y:auto;box-shadow:0 30px 80px rgba(0,0,0,.5)}
+.mdt{font-family:'Syne',sans-serif;font-weight:700;font-size:15px;letter-spacing:.08em;margin-bottom:16px;display:flex;align-items:center;justify-content:space-between}
+.mdc{background:none;border:none;color:var(--txd);cursor:pointer;font-size:18px;padding:4px;line-height:1}
+.mdsec{margin-bottom:16px}
+.mdst{font-family:'IBM Plex Mono',monospace;font-size:10px;font-weight:600;letter-spacing:.12em;text-transform:uppercase;color:var(--txm);margin-bottom:7px}
+.fg{display:flex;flex-direction:column;gap:6px;margin-bottom:7px}
+.fl{font-size:11px;color:var(--txd);margin-bottom:2px}
+.mi{background:var(--sf2);border:1px solid var(--bd);border-radius:7px;padding:7px 11px;font-family:'IBM Plex Mono',monospace;font-size:12px;color:var(--tx);width:100%;outline:none;transition:border-color .2s}
+.mi:focus{border-color:var(--ac)}
+.mi::placeholder{color:var(--txm)}
+.mdb{padding:8px 17px;border-radius:8px;border:none;font-family:'IBM Plex Mono',monospace;font-size:12px;font-weight:500;cursor:pointer;transition:all .2s}
+.mdb.pri{background:var(--ac);color:white}
+.mdb.pri:hover{box-shadow:0 4px 14px var(--acg)}
+.mdb.sec{background:var(--sf2);color:var(--txd);border:1px solid var(--bd)}
+.mdb.sec:hover{border-color:var(--bd2);color:var(--tx)}
+.mda{display:flex;gap:7px;justify-content:flex-end}
+
+/* BOTTOM NAV mobile */
+.bnav{display:none;position:fixed;bottom:0;left:0;right:0;z-index:150;height:62px;background:rgba(14,14,32,.97);backdrop-filter:blur(20px);border-top:1px solid var(--bd);flex-direction:row;align-items:stretch}
+.bni{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;cursor:pointer;color:var(--txm);transition:color .2s;padding:8px 2px;border:none;background:none;position:relative}
+.bni.act{color:var(--acb)}
+.bni.tla{color:var(--tl)}
+.bni svg{width:20px;height:20px}
+.bnl{font-family:'IBM Plex Mono',monospace;font-size:9px;font-weight:600;letter-spacing:.04em;text-transform:uppercase}
+.bndot{position:absolute;top:7px;right:calc(50% - 15px);width:7px;height:7px;border-radius:50%;background:var(--tl);box-shadow:0 0 6px var(--tl);display:none}
+.bni.tla .bndot{display:block}
+
+/* TOAST */
+.tc{position:fixed;bottom:24px;left:50%;transform:translateX(-50%);z-index:1000;display:flex;flex-direction:column;align-items:center;gap:7px}
+.tos{background:rgba(30,30,50,.95);border:1px solid var(--bd2);border-radius:10px;padding:9px 15px;font-family:'IBM Plex Mono',monospace;font-size:12px;color:var(--tx);animation:tin .3s ease;box-shadow:0 8px 30px rgba(0,0,0,.5);max-width:340px;text-align:center;white-space:nowrap}
+.tos.ok{border-color:var(--tl)}
+.tos.er{border-color:var(--dg)}
+@keyframes tin{from{transform:translateY(10px);opacity:0}to{transform:translateY(0);opacity:1}}
+
+/* FAB voice button - mobile only */
+.fab-voice{display:none;position:fixed;right:16px;bottom:155px;z-index:145;
+  width:54px;height:54px;border-radius:50%;border:none;cursor:pointer;
+  background:linear-gradient(135deg,var(--tl) 0%,var(--acb) 100%);
+  color:white;box-shadow:0 4px 20px rgba(0,212,170,.5);
+  align-items:center;justify-content:center;
+  transition:transform .2s,box-shadow .2s;animation:fab-pulse 3s infinite}
+.fab-voice:hover,.fab-voice:active{transform:scale(1.1);box-shadow:0 6px 28px rgba(0,212,170,.7)}
+@keyframes fab-pulse{0%,100%{box-shadow:0 4px 20px rgba(0,212,170,.5)}50%{box-shadow:0 4px 30px rgba(0,212,170,.8),0 0 0 8px rgba(0,212,170,.12)}}
+.fab-voice.active-vc{background:linear-gradient(135deg,var(--dg),#e05070);animation:none;box-shadow:0 4px 20px rgba(255,107,138,.5)}
+.fab-label{position:absolute;right:66px;top:50%;transform:translateY(-50%);
+  background:rgba(0,0,0,.75);color:white;padding:5px 10px;border-radius:8px;
+  font-family:'IBM Plex Mono',monospace;font-size:11px;white-space:nowrap;
+  pointer-events:none;opacity:0;transition:opacity .2s}
+.fab-voice:hover .fab-label{opacity:1}
+
+/* RESPONSIVE */
+@media(max-width:768px){
+  .sidebar{display:none}
+  .bnav{display:flex}
+  .layout{margin-bottom:62px}
+  .dms,.msgs,.trmsgs{padding:13px;gap:12px}
+  .cb{padding:8px 9px;gap:5px}
+  .cbt2{font-size:10px;padding:8px 4px}
+  .pbar,.gbar,.trbar{padding:8px 12px;gap:8px}
+  .ia{padding:8px 12px 10px}
+  .tc{bottom:70px}
+  /* hide desktop voice btn in partner bar on mobile - FAB takes over */
+  .pab.von{display:none}
+  /* show FAB */
+  .fab-voice{display:flex}
+  /* make back/clear buttons smaller */
+  .pab{padding:5px 8px;font-size:10px}
+  /* header: hide api config text, keep icon */
+  /* shrink voice playback button to icon-only on mobile */
+  #vplbtn span{display:none}
+  #vplbtn{padding:5px 8px;min-width:32px;justify-content:center}
+  /* 3-col mode cards → stack on small screens */
+  .amr{grid-template-columns:1fr 1fr 1fr}
+  .amc .amn{font-size:12px}
+  .amc .amd{font-size:10px}
+  .amc{padding:12px 8px}
+}
+@media(max-width:420px){
+  .amr{grid-template-columns:1fr 1fr 1fr;gap:6px}
+  .amc{padding:10px 5px}
+  .amic{font-size:22px;margin-bottom:3px}
+  .amc .amn{font-size:11px}
+  .amc .amd{font-size:9px}
+}
+@media(min-width:769px){.bnav{display:none!important}.fab-voice{display:none!important}}
+::-webkit-scrollbar{width:5px;height:5px}
+::-webkit-scrollbar-track{background:transparent}
+::-webkit-scrollbar-thumb{background:var(--bd);border-radius:3px}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo"><div class="lm">⬡</div>COOLIF<span style="color:var(--acb)">EVO</span></div>
+  <span class="hbadge" id="hbadge">就绪</span>
+  <div class="hr">
+    <button class="hbtn" id="vplbtn" onclick="toggleVP()">
+      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M15.54 8.46a5 5 0 0 1 0 7.07"/>
+      </svg>
+      <span id="vplab">语音播报</span>
+    </button>
+    <button class="hbtn" onclick="openCfg()">⚙ API 配置</button>
+  </div>
+</header>
+
+<div class="layout">
+  <!-- SIDEBAR -->
+  <aside class="sidebar" id="sidebar">
+    <div class="sec" id="sideMdSec">
+      <div class="sl"><span id="sideMdLabel">选择 AI</span><span id="sideSel" style="color:var(--acb);font-size:10px"></span></div>
+      <div id="sideMdList"></div>
+    </div>
+    <div class="sec" id="sideStatSec" style="display:none">
+      <div class="sl">讨论状态</div>
+      <div class="stg">
+        <div class="str"><span class="stk">当前轮次</span><span class="stv" id="stRnd">—</span></div>
+        <div class="str"><span class="stk">发言次数</span><span class="stv" id="stTrn">0</span></div>
+        <div class="str"><span class="stk">共识度</span><span class="stv g" id="stCon">—</span></div>
+        <div class="str"><span class="stk">运行模式</span><span class="stv" id="stMod">手动</span></div>
+      </div>
+      <div class="cbar"><div class="cbarf" id="stConF" style="width:0"></div></div>
+    </div>
+    <div class="sec">
+      <div class="sl"><span>API 配置</span><button class="cfgl" onclick="openCfg()">配置 →</button></div>
+      <div style="font-family:'IBM Plex Mono',monospace;font-size:10px;color:var(--txm);line-height:1.6">输入各模型的<br>API Key · 地址 · 模型名</div>
+    </div>
+  </aside>
+
+  <div class="main">
+    <!-- SETUP -->
+    <div id="setupSc">
+      <div class="si">
+        <div class="seye">CoolifeVO 多 AI 系统</div>
+        <div class="stit">选择你的对话方式</div>
+        <div class="ssub">1对1 深度对话 · 多AI嘉宾式讨论 · 中泰实时互译 — 均支持纯语音模式</div>
+        <div class="slbl">对话模式</div>
+        <div class="amr">
+          <div class="amc sel" id="am1v1" onclick="selAppMode('1v1')">
+            <span class="amic">🎙</span><span class="amn">1 对 1 对话</span>
+            <span class="amd">选一个 AI 深度聊天<br>纯语音免手操作</span>
+          </div>
+          <div class="amc" id="amMulti" onclick="selAppMode('multi')">
+            <span class="amic">🧑‍🤝‍🧑</span><span class="amn">多 AI 讨论</span>
+            <span class="amd">嘉宾主导 · 评议补充<br>阶段报告 · 自动收敛</span>
+          </div>
+          <div class="amc" id="amTrans" onclick="selAppMode('trans')">
+            <span class="amic">🇹🇭</span><span class="amn">中泰互译</span>
+            <span class="amd">说中文翻泰语<br>说泰语翻中文</span>
+          </div>
+        </div>
+        <div id="blk1v1">
+          <div class="slbl">选择你的 AI 伙伴</div>
+          <div class="mg" id="g1v1"></div>
+        </div>
+        <div id="blkMulti" style="display:none">
+          <div class="slbl">参与模型（含 GPT 主持人，选 2–4 个）</div>
+          <div class="mg" id="gMulti"></div>
+          <div class="slbl">讨论话题</div>
+          <textarea class="tinp" id="topicInp" rows="3" placeholder="例如：大语言模型是否真的具备推理能力？"></textarea>
+          <div class="slbl" style="margin-bottom:8px">运行模式</div>
+          <div class="rmr">
+            <div class="rmb active" id="rmM" onclick="selRunMode('manual')">
+              <span class="rmi">🎮</span><span class="rmn">手动控制</span><span class="rmd">每轮后等待用户决定</span>
+            </div>
+            <div class="rmb" id="rmA" onclick="selRunMode('auto')">
+              <span class="rmi">🤖</span><span class="rmn">自动收敛</span><span class="rmd">共识≥85% 自动停止</span>
+            </div>
+          </div>
+        </div>
+        <div id="blkTrans" style="display:none">
+          <div class="slbl">翻译引擎（选一个 AI 模型）</div>
+          <div class="mg" id="gTrans"></div>
+          <div class="slbl">语音识别方式</div>
+          <div class="rmr">
+            <div class="rmb active" id="srBrowser" onclick="selSrMode('browser')">
+              <span class="rmi">🌐</span><span class="rmn">浏览器识别</span><span class="rmd">免配置 · Chrome/Edge</span>
+            </div>
+            <div class="rmb" id="srWhisper" onclick="selSrMode('whisper')">
+              <span class="rmi">🎧</span><span class="rmn">Whisper API</span><span class="rmd">泰语识别更精准</span>
+            </div>
+          </div>
+        </div>
+        <button class="stbtn" onclick="handleStart()">开始 →</button>
+        <div class="stnote">需配置 API Key · 1对1 至少 1 个模型 · 多AI至少 2 个 · 中泰互译选 1 个</div>
+      </div>
+    </div>
+
+    <!-- 1v1 CHAT -->
+    <div id="chatSc">
+      <div class="pbar">
+        <div class="pav" id="pav">?</div>
+        <div class="pi">
+          <div class="pn" id="pname">AI 伙伴</div>
+          <div class="pr" id="prole">—</div>
+        </div>
+        <div class="pacts">
+          <button class="pab von" onclick="openVC()" title="纯语音 — 全程免手操作">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/>
+              <path d="M19 10v2a7 7 0 0 1-14 0v-2"/>
+              <line x1="12" y1="19" x2="12" y2="23"/><line x1="8" y1="23" x2="16" y2="23"/>
+            </svg>
+            纯语音
+          </button>
+          <button class="pab" onclick="clearChat()">清空</button>
+          <button class="pab back" onclick="backSetup()">← 返回</button>
+        </div>
+      </div>
+      <div class="msgs" id="chatMsgs">
+        <div class="emp" id="chatEmp">
+          <div class="emp-i">💬</div>
+          <div class="emp-t">开始对话</div>
+          <div class="emp-s">输入文字或点击「纯语音」<br>进入全程免手操作语音模式</div>
+        </div>
+      </div>
+      <div class="ia">
+        <div class="iw">
+          <button class="micb" id="micBtn" onclick="toggleMicInput()" title="语音输入">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/>
+              <path d="M19 10v2a7 7 0 0 1-14 0v-2"/>
+              <line x1="12" y1="19" x2="12" y2="23"/><line x1="8" y1="23" x2="16" y2="23"/>
+            </svg>
+          </button>
+          <textarea id="ci" placeholder="和 AI 说…" rows="1" onkeydown="onKey(event)" oninput="resize(this)"></textarea>
+          <button class="sbtn2" id="sendBtn" onclick="sendChat()">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+              <line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/>
+            </svg>
+          </button>
+          <button class="stopb" id="stopBtn" onclick="stopGen()" style="display:none">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><rect x="6" y="6" width="12" height="12" rx="2"/></svg>
+          </button>
+        </div>
+        <div class="im">
+          <span id="iHint">Enter 发送 · Shift+Enter 换行</span>
+          <span id="turnCnt" style="color:var(--txm)">0 轮对话</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- DISCUSSION -->
+    <div id="discSc">
+      <div class="gbar">
+        <div class="gav" id="guestAv">?</div>
+        <div class="ginfo">
+          <div class="gn"><span id="guestNm">嘉宾</span><span class="gtag">嘉宾</span></div>
+          <div class="gt" id="guestTp">话题加载中…</div>
+        </div>
+        <div class="rpill" id="rndPill">第 0 轮</div>
+        <button class="pab von" id="discVcBtn" onclick="openDiscVC()" title="纯语音参与讨论" style="margin-left:6px;white-space:nowrap;flex-shrink:0">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/>
+            <path d="M19 10v2a7 7 0 0 1-14 0v-2"/>
+            <line x1="12" y1="19" x2="12" y2="23"/><line x1="8" y1="23" x2="16" y2="23"/>
+          </svg>
+          语音
+        </button>
+      </div>
+      <div class="rpbar">
+        <span class="rpl">阶段报告</span>
+        <div class="rpd"><div class="rpdot" id="rp0"></div><div class="rpdot" id="rp1"></div><div class="rpdot" id="rp2"></div></div>
+        <span class="rpl" id="rpSub" style="margin-left:7px">每 3 轮触发</span>
+      </div>
+      <div class="dms" id="discMsgs"></div>
+      <div class="cb">
+        <button class="cbt2 pri" id="ctCont" onclick="contDisc()"><span class="ci">▶</span><span>继续</span></button>
+        <button class="cbt2" id="ctRpt" onclick="reqReport()"><span class="ci">📋</span><span>报告</span></button>
+        <button class="cbt2 tl" id="ctAuto" onclick="togAuto()"><span class="ci">🔄</span><span>自动</span></button>
+        <button class="cbt2 dg" id="ctEnd" onclick="endDisc()"><span class="ci">⏹</span><span>总结</span></button>
+      </div>
+    </div>
+
+    <!-- SUMMARY -->
+    <div id="sumSc">
+      <div class="sumi">
+        <div class="sumh">
+          <div class="sumico">◈</div>
+          <div><div class="sumt">最终讨论报告</div><div class="summ" id="sumMeta">由嘉宾 AI 整合输出</div></div>
+        </div>
+        <div id="sumBody"></div>
+        <div class="suma">
+          <button class="sumab pri" onclick="backSetup()">开启新对话</button>
+          <button class="sumab" onclick="copyRpt()">复制报告</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- TRANSLATION -->
+    <div id="transSc">
+      <div class="trbar">
+        <div class="trav">🇹🇭</div>
+        <div class="trinfo">
+          <div class="trn"><span>中泰互译</span><span class="trtag" id="trEngine">—</span></div>
+          <div class="trsub" id="trSrLabel">浏览器语音识别</div>
+        </div>
+        <div class="tr-dir">
+          <span>中</span><span class="tr-dir-arrow">⇄</span><span>ไทย</span>
+        </div>
+        <button class="pab" onclick="clearTrans()">清空</button>
+        <button class="pab back" onclick="backSetup()">← 返回</button>
+      </div>
+      <div class="trmsgs" id="trMsgs">
+        <div class="tr-emp" id="trEmp">
+          <div class="emp-i">🇹🇭</div>
+          <div class="emp-t">中泰实时互译</div>
+          <div class="emp-s" style="font-family:'IBM Plex Mono',monospace">输入文字或按麦克风说话<br>中文 → 泰语 · 泰语 → 中文</div>
+        </div>
+      </div>
+      <div class="ia">
+        <div class="iw">
+          <button class="micb" id="trMicBtn" onclick="toggleTrMic()" title="语音输入">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/>
+              <path d="M19 10v2a7 7 0 0 1-14 0v-2"/>
+              <line x1="12" y1="19" x2="12" y2="23"/><line x1="8" y1="23" x2="16" y2="23"/>
+            </svg>
+          </button>
+          <textarea id="trInput" placeholder="输入中文或泰语…" rows="1" onkeydown="trOnKey(event)" oninput="trResize(this)"></textarea>
+          <button class="sbtn2" id="trSendBtn" onclick="sendTrans()">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+              <line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/>
+            </svg>
+          </button>
+        </div>
+        <div class="im">
+          <span id="trHint">Enter 翻译 · Shift+Enter 换行 · 🎙 语音输入</span>
+          <span id="trCnt" style="color:var(--txm)">0 条翻译</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- VOICE OVERLAY -->
+<div class="vco" id="vco">
+  <div class="vch">
+    <div class="vct"><div class="vcm">⬡</div><span>纯语音对话</span></div>
+    <div style="display:flex;align-items:center;gap:9px">
+      <span class="vcmtag" id="vcMTag" style="background:var(--sf2);color:var(--txd)">—</span>
+      <button class="vccl" onclick="exitVC()">✕ 退出</button>
+    </div>
+  </div>
+  <div class="vcbd">
+    <div class="vcaw">
+      <div class="vcav" id="vcAv">⬡</div>
+      <div class="vcst" id="vcSt">按麦克风开始对话</div>
+    </div>
+    <div class="vctr" id="vcTr"><div class="vcem">按一次麦克风 · 之后全程免手自动循环对话 🎙</div></div>
+  </div>
+  <div class="vcft">
+    <div class="vcw" id="vcWv"><span></span><span></span><span></span><span></span><span></span></div>
+    <button class="vcmic" id="vcMic" onclick="vcToggle()">
+      <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/>
+        <path d="M19 10v2a7 7 0 0 1-14 0v-2"/>
+        <line x1="12" y1="19" x2="12" y2="23"/><line x1="8" y1="23" x2="16" y2="23"/>
+      </svg>
+    </button>
+    <div class="vchi" id="vcHi">点击开始，之后全程自动循环</div>
+  </div>
+</div>
+
+<!-- FAB voice button (mobile) -->
+<button class="fab-voice" id="fabVoice" onclick="fabVoiceClick()" title="纯语音对话">
+  <div class="fab-label">纯语音</div>
+  <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+    <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/>
+    <path d="M19 10v2a7 7 0 0 1-14 0v-2"/>
+    <line x1="12" y1="19" x2="12" y2="23"/><line x1="8" y1="23" x2="16" y2="23"/>
+  </svg>
+</button>
+
+<!-- MOBILE BOTTOM NAV -->
+<nav class="bnav" id="bnav">
+  <button class="bni act" id="bn0" onclick="bnClick('home')">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+      <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/>
+    </svg>
+    <span class="bnl">首页</span>
+  </button>
+  <button class="bni" id="bn1" onclick="bnClick('models')">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+      <polygon points="12 2 2 7 12 12 22 7 12 2"/><polyline points="2 17 12 22 22 17"/><polyline points="2 12 12 17 22 12"/>
+    </svg>
+    <span class="bnl">模型</span>
+  </button>
+  <button class="bni" id="bn2" onclick="bnClick('voice')">
+    <div class="bndot"></div>
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+      <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/>
+      <path d="M19 10v2a7 7 0 0 1-14 0v-2"/>
+      <line x1="12" y1="19" x2="12" y2="23"/><line x1="8" y1="23" x2="16" y2="23"/>
+    </svg>
+    <span class="bnl" id="bn2lab">语音</span>
+  </button>
+  <button class="bni" id="bn3" onclick="toggleVP()">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+      <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/>
+      <path d="M15.54 8.46a5 5 0 0 1 0 7.07M19.07 4.93a10 10 0 0 1 0 14.14"/>
+    </svg>
+    <span class="bnl" id="bn3lab">播报</span>
+  </button>
+  <button class="bni" id="bn4" onclick="openCfg()">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+      <circle cx="12" cy="12" r="3"/>
+      <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/>
+    </svg>
+    <span class="bnl">设置</span>
+  </button>
+</nav>
+
+<div class="tc" id="tc"></div>
+
+<!-- SETTINGS MODAL -->
+<div class="mo" id="cfgMo">
+  <div class="mod">
+    <div class="mdt">API 配置<button class="mdc" onclick="closeCfg()">✕</button></div>
+    <div id="cfgBody"></div>
+    <div class="mda">
+      <button class="mdb sec" onclick="closeCfg()">取消</button>
+      <button class="mdb pri" onclick="saveCfg()">保存</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ════ MODEL INFO ════
+var MI = {
+  gpt:      {name:'GPT',        color:'#60a5fa', role:'通用综合·主持人',   emoji:'G'},
+  gemini:   {name:'Gemini',     color:'#a78bfa', role:'长文档·多模态',     emoji:'Ge'},
+  opus:     {name:'Opus',       color:'#34d399', role:'深度推理·工程规划', emoji:'Op'},
+  deepseek: {name:'DeepSeek',   color:'#fb7185', role:'中文专家·中文报告', emoji:'Ds'},
+  sonnet:   {name:'Sonnet 4.6', color:'#f59e0b', role:'快速响应·日常对话', emoji:'So'},
+  gptmini:  {name:'GPT-5-Mini', color:'#38bdf8', role:'轻量快速·日常问答', emoji:'Gm'},
+  ds32:     {name:'DeepSeek V3.2', color:'#f472b6', role:'中文推理·深度分析', emoji:'D3'}
+};
+var MODELS = ['gpt','gemini','opus','deepseek','sonnet','gptmini','ds32'];
+
+var cfg = {
+  gpt:      {key:'', url:'https://xyuapi.top/v1',  model:'gpt-5.4-pro-thinking'},
+  gemini:   {key:'', url:'https://xyuapi.top/v1',  model:'gemini-3.1-pro-preview'},
+  opus:     {key:'', url:'https://xyuapi.top/v1',  model:'claude-opus-4-6-thinking'},
+  deepseek: {key:'', url:'https://xyuapi.top/v1',  model:'deepseek-v3.2-thinking'},
+  sonnet:   {key:'', url:'https://xyuapi.top/v1',  model:'claude-sonnet-4-6-thinking'},
+  gptmini:  {key:'', url:'https://poloai.top/v1',  model:'gpt-5-mini'},
+  ds32:     {key:'', url:'https://poloai.top/v1',  model:'deepseek-v3.2'}
+};
+
+// ════ APP STATE ════
+var appMode = '1v1';
+var runMode = 'manual';
+var sel1v1  = 'gpt';
+var selMulti = {gpt:true};
+var vpOn = false;
+var isProc = false;
+var chatHist = [];
+var abCtrl = null;
+var isRec = false;
+var recObj = null;
+
+// Discussion state
+var dTopic='', dGuest='', dRevs=[];
+var dRnd=0, dTrn=0, dLog=[], dCons=0, dHigh=0;
+var dRun=false, dAuto=false, dStop=false;
+var finalRpt='';
+var thinkIdx=0;
+
+// Translation state
+var selTrans = 'gptmini';      // model for translation
+var srMode = 'browser';        // 'browser' | 'whisper'
+var trSt = 'idle';             // idle | recording | processing | speaking
+var trRec = null;              // browser SpeechRecognition
+var trMediaRec = null;         // MediaRecorder for Whisper
+var trAudioChunks = [];
+var trCount = 0;
+var whisperCfg = {key:'', url:'https://poloai.top/v1', model:'whisper-1'};
+
+// ════ INIT ════
+loadCfg();
+buildSetupGrids();
+buildSidebar();
+buildCfgModal();
+
+// ════ SETUP ════
+function buildSetupGrids() {
+  var g1 = document.getElementById('g1v1');
+  var gm = document.getElementById('gMulti');
+  var gt = document.getElementById('gTrans');
+  g1.innerHTML = ''; gm.innerHTML = ''; gt.innerHTML = '';
+  MODELS.forEach(function(k) {
+    var info = MI[k];
+    var isSel1 = sel1v1 === k;
+    var isSelM = selMulti[k];
+    var isSelT = selTrans === k;
+    var isGpt  = k === 'gpt';
+    // 1v1 card
+    var d1 = document.createElement('div');
+    d1.className = 'sgc' + (isSel1 ? ' sel' : '');
+    d1.setAttribute('data-m', k);
+    d1.onclick = (function(key){ return function(){ sel1v1=key; buildSetupGrids(); buildSidebar(); }; })(k);
+    d1.innerHTML = '<div class="sp" style="background:'+info.color+';box-shadow:0 0 8px '+info.color+'"></div>'
+      +'<div class="si2"><div class="sn">'+info.name+'</div><div class="sr">'+info.role+'</div></div>'
+      +'<div class="sc">'+(isSel1?'✓':'')+'</div>';
+    g1.appendChild(d1);
+    // multi card
+    var dm = document.createElement('div');
+    dm.className = 'sgc' + (isSelM ? ' sel' : '');
+    dm.setAttribute('data-m', k);
+    if (!isGpt) {
+      dm.onclick = (function(key){ return function(){ toggleMulti(key); }; })(k);
+    } else {
+      dm.style.opacity = '0.7'; dm.style.cursor = 'default';
+    }
+    dm.innerHTML = '<div class="sp" style="background:'+info.color+';box-shadow:0 0 8px '+info.color+'"></div>'
+      +'<div class="si2"><div class="sn">'+info.name+(isGpt?' (主持人)':'')+'</div><div class="sr">'+info.role+'</div></div>'
+      +'<div class="sc">'+(isSelM?'✓':'')+'</div>';
+    gm.appendChild(dm);
+    // translation card
+    var dtc = document.createElement('div');
+    dtc.className = 'sgc' + (isSelT ? ' sel' : '');
+    dtc.setAttribute('data-m', k);
+    dtc.onclick = (function(key){ return function(){ selTrans=key; buildSetupGrids(); buildSidebar(); }; })(k);
+    dtc.innerHTML = '<div class="sp" style="background:'+info.color+';box-shadow:0 0 8px '+info.color+'"></div>'
+      +'<div class="si2"><div class="sn">'+info.name+'</div><div class="sr">'+info.role+'</div></div>'
+      +'<div class="sc">'+(isSelT?'✓':'')+'</div>';
+    gt.appendChild(dtc);
+  });
+}
+
+function toggleMulti(k) {
+  var cnt = Object.keys(selMulti).filter(function(x){return selMulti[x];}).length;
+  if (selMulti[k]) {
+    if (cnt <= 2) { toast('至少需要2个模型','er'); return; }
+    selMulti[k] = false;
+  } else {
+    if (cnt >= 4) { toast('最多4个模型','er'); return; }
+    selMulti[k] = true;
+  }
+  buildSetupGrids(); buildSidebar();
+}
+
+function buildSidebar() {
+  var list = document.getElementById('sideMdList');
+  list.innerHTML = '';
+  MODELS.forEach(function(k) {
+    var info = MI[k];
+    var sel = appMode==='1v1' ? sel1v1===k : !!selMulti[k];
+    var d = document.createElement('div');
+    d.className = 'mc' + (sel?' sel':'');
+    d.setAttribute('data-m', k);
+    d.onclick = (function(key){ return function(){
+      if (appMode==='1v1') { sel1v1=key; buildSetupGrids(); buildSidebar(); }
+      else if (key!=='gpt') toggleMulti(key);
+    }; })(k);
+    d.innerHTML = '<div class="mc-p" style="background:'+info.color+';box-shadow:0 0 8px '+info.color+'"></div>'
+      +'<div class="mc-t"><div class="mc-n">'+info.name+'</div><div class="mc-r">'+info.role+'</div></div>'
+      +'<div class="mc-c">'+(sel?'✓':'')+'</div>';
+    list.appendChild(d);
+  });
+  document.getElementById('sideMdLabel').textContent = appMode==='1v1' ? '选择 AI 伙伴' : '参与 AI';
+  var cnt = Object.keys(selMulti).filter(function(x){return selMulti[x];}).length;
+  document.getElementById('sideSel').textContent = appMode==='multi' ? cnt+'个已选' : '';
+}
+
+function selAppMode(m) {
+  appMode = m;
+  document.getElementById('am1v1').className   = 'amc' + (m==='1v1'?' sel':'');
+  document.getElementById('amMulti').className = 'amc' + (m==='multi'?' sel tl':'');
+  document.getElementById('amTrans').className = 'amc' + (m==='trans'?' sel dg':'');
+  document.getElementById('blk1v1').style.display   = m==='1v1' ? '' : 'none';
+  document.getElementById('blkMulti').style.display = m==='multi' ? '' : 'none';
+  document.getElementById('blkTrans').style.display = m==='trans' ? '' : 'none';
+  buildSidebar(); buildSetupGrids();
+}
+
+function selSrMode(m) {
+  srMode = m;
+  document.getElementById('srBrowser').className = 'rmb' + (m==='browser'?' active':'');
+  document.getElementById('srWhisper').className = 'rmb' + (m==='whisper'?' active tl':'');
+}
+
+function selRunMode(m) {
+  runMode = m;
+  document.getElementById('rmM').className = 'rmb' + (m==='manual'?' active':'');
+  document.getElementById('rmA').className = 'rmb' + (m==='auto'?' active tl':'');
+}
+
+function handleStart() {
+  if (appMode==='1v1') start1v1();
+  else if (appMode==='trans') startTrans();
+  else startDisc();
+}
+
+// ════ 1v1 CHAT ════
+function start1v1() {
+  if (!cfg[sel1v1].key) { toast(MI[sel1v1].name+' 未配置 API Key','er'); return; }
+  chatHist = []; isProc = false;
+  showSc('chat');
+  var info = MI[sel1v1];
+  var pav = document.getElementById('pav');
+  pav.textContent = info.emoji;
+  pav.style.cssText = 'background:'+info.color+'22;color:'+info.color+';border:1px solid '+info.color+'44;width:34px;height:34px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:700;font-family:Syne,sans-serif;flex-shrink:0';
+  document.getElementById('pname').textContent = info.name;
+  document.getElementById('prole').textContent = info.role;
+  document.getElementById('hbadge').textContent = '1对1 · '+info.name;
+  document.getElementById('hbadge').className = 'hbadge';
+  document.getElementById('ci').placeholder = '和 '+info.name+' 说…';
+  updTurnCnt();
+}
+
+function onKey(e) { if (e.key==='Enter'&&!e.shiftKey){e.preventDefault();sendChat();} }
+function resize(el) { el.style.height='auto'; el.style.height=Math.min(el.scrollHeight,130)+'px'; }
+
+function sendChat() {
+  if (isProc) return;
+  var inp = document.getElementById('ci');
+  var text = inp.value.trim(); if (!text) return;
+  inp.value=''; resize(inp);
+  document.getElementById('chatEmp').style.display='none';
+  addUserBub(text); chatHist.push({role:'user',content:text});
+  isProc=true;
+  document.getElementById('sendBtn').style.display='none';
+  document.getElementById('stopBtn').style.display='flex';
+  document.getElementById('iHint').textContent='AI 思考中…';
+  abCtrl = new AbortController();
+  var thid = addThinkBub(sel1v1);
+  callM(sel1v1, chatHist.slice(-12).map(function(h){return {role:h.role,content:h.content};}))
+    .then(function(reply) {
+      rmEl(thid);
+      chatHist.push({role:'assistant',content:reply,model:sel1v1});
+      addAIBub(sel1v1, reply);
+      if (vpOn) tts(reply);
+      updTurnCnt();
+    })
+    .catch(function(err) { rmEl(thid); if (err.name!=='AbortError') toast(err.message,'er'); })
+    .finally(function() {
+      isProc=false; abCtrl=null;
+      document.getElementById('sendBtn').style.display='flex';
+      document.getElementById('stopBtn').style.display='none';
+      document.getElementById('iHint').textContent='Enter 发送 · Shift+Enter 换行';
+    });
+}
+
+function stopGen() {
+  if (abCtrl) { abCtrl.abort(); abCtrl=null; }
+  isProc=false;
+  document.getElementById('sendBtn').style.display='flex';
+  document.getElementById('stopBtn').style.display='none';
+  document.getElementById('iHint').textContent='Enter 发送 · Shift+Enter 换行';
+}
+
+function clearChat() {
+  chatHist=[];
+  document.getElementById('chatMsgs').innerHTML='<div class="emp" id="chatEmp"><div class="emp-i">💬</div><div class="emp-t">对话已清空</div><div class="emp-s">重新开始对话</div></div>';
+  updTurnCnt();
+}
+
+function updTurnCnt() {
+  var n = chatHist.filter(function(h){return h.role==='user';}).length;
+  document.getElementById('turnCnt').textContent = n+' 轮对话';
+}
+
+// DOM helpers chat
+var bubIdx=0;
+function addUserBub(text) {
+  var c=document.getElementById('chatMsgs');
+  var d=document.createElement('div'); d.className='mw';
+  d.innerHTML='<div class="mu">'+esc(text)+'</div>';
+  c.appendChild(d); scrollC(c);
+}
+function addAIBub(model, text) {
+  var c=document.getElementById('chatMsgs');
+  var info=MI[model];
+  var d=document.createElement('div'); d.className='mg2';
+  d.innerHTML='<div class="ml" style="color:'+info.color+'"><span>● '+info.name+'</span>'
+    +'<button class="spkb" onclick="tts(this.getAttribute(\'data-t\'))" data-t="'+escA(text)+'">'
+    +'<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">'
+    +'<polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M15.54 8.46a5 5 0 0 1 0 7.07"/></svg>'
+    +'</button></div>'
+    +'<div class="mb fm-'+model+'"><div class="bt">'+esc(text)+'</div></div>';
+  c.appendChild(d); scrollC(c);
+}
+function addThinkBub(model) {
+  var c=document.getElementById('chatMsgs');
+  var id='th-'+(++bubIdx);
+  var info=MI[model];
+  var d=document.createElement('div'); d.id=id; d.className='mg2';
+  d.innerHTML='<div class="ml" style="color:'+info.color+'">● '+info.name+' 思考中</div>'
+    +'<div class="mb fm-'+model+'" style="opacity:.6"><div class="td"><span></span><span></span><span></span></div></div>';
+  c.appendChild(d); scrollC(c); return id;
+}
+
+// ════ LANGUAGE DETECTION ════
+function detectLang(text) {
+  if (!text) return 'zh-CN';
+  // Count characters by script
+  var th=0, zh=0, ja=0, ko=0, en=0, ar=0, ru=0, total=0;
+  for (var i=0; i<text.length; i++) {
+    var c=text.charCodeAt(i);
+    if (c>=0x0E00 && c<=0x0E7F) { th++; total++; }
+    else if ((c>=0x4E00 && c<=0x9FFF)||(c>=0x3400 && c<=0x4DBF)) { zh++; total++; }
+    else if ((c>=0x3040 && c<=0x309F)||(c>=0x30A0 && c<=0x30FF)) { ja++; total++; }
+    else if (c>=0xAC00 && c<=0xD7AF) { ko++; total++; }
+    else if (c>=0x0600 && c<=0x06FF) { ar++; total++; }
+    else if (c>=0x0400 && c<=0x04FF) { ru++; total++; }
+    else if ((c>=0x41 && c<=0x5A)||(c>=0x61 && c<=0x7A)) { en++; total++; }
+  }
+  if (total===0) return 'zh-CN';
+  if (th/total > 0.15) return 'th-TH';
+  if (ja/total > 0.1) return 'ja-JP';
+  if (ko/total > 0.1) return 'ko-KR';
+  if (ar/total > 0.1) return 'ar-SA';
+  if (ru/total > 0.1) return 'ru-RU';
+  if (zh/total > 0.1) return 'zh-CN';
+  if (en/total > 0.3) return 'en-US';
+  return 'zh-CN';
+}
+
+function findVoice(lang) {
+  var voices = window.speechSynthesis.getVoices();
+  var prefix = lang.split('-')[0]; // e.g. 'th', 'zh', 'en'
+  // Prefer local voice matching full lang code
+  var v = voices.find(function(v){ return v.lang === lang && v.localService; });
+  if (v) return v;
+  // Then any voice matching full lang code
+  v = voices.find(function(v){ return v.lang === lang; });
+  if (v) return v;
+  // Then local voice matching prefix
+  v = voices.find(function(v){ return v.lang.indexOf(prefix) === 0 && v.localService; });
+  if (v) return v;
+  // Then any voice matching prefix
+  v = voices.find(function(v){ return v.lang.indexOf(prefix) === 0; });
+  return v || null;
+}
+
+// ════ VOICE PLAYBACK ════
+function toggleVP() {
+  vpOn=!vpOn;
+  var btn=document.getElementById('vplbtn');
+  var lab=document.getElementById('vplab');
+  if(btn)btn.classList.toggle('on',vpOn);
+  if(lab)lab.textContent=vpOn?'语音·ON':'语音播报';
+  // Update mobile bottom nav voice btn
+  var bn3=document.getElementById('bn3');
+  var bn3lab=document.getElementById('bn3lab');
+  if(bn3)bn3.classList.toggle('act',vpOn);
+  if(bn3lab)bn3lab.textContent=vpOn?'播报·ON':'播报';
+  if (!vpOn&&window.speechSynthesis) window.speechSynthesis.cancel();
+  toast(vpOn?'语音播报已开启':'语音播报已关闭','ok');
+}
+function tts(text) {
+  if (!window.speechSynthesis) return;
+  window.speechSynthesis.cancel();
+  var lang = detectLang(text);
+  var utt=new SpeechSynthesisUtterance(text);
+  utt.lang=lang; utt.rate=1.0; utt.pitch=1.0;
+  var voice = findVoice(lang);
+  if(voice) utt.voice=voice;
+  window.speechSynthesis.speak(utt);
+}
+
+// ════ MIC INPUT (text field) ════
+function toggleMicInput() {
+  var btn=document.getElementById('micBtn');
+  var SR=window.SpeechRecognition||window.webkitSpeechRecognition;
+  if(!SR){toast('请使用 Chrome 或 Edge','er');return;}
+  if(isRec){if(recObj)recObj.stop();isRec=false;btn.classList.remove('rec');return;}
+  recObj=new SR(); recObj.lang='zh-CN'; recObj.continuous=true; recObj.interimResults=true;
+  var fin='';
+  recObj.onstart=function(){isRec=true;btn.classList.add('rec');toast('🎙 正在聆听…','ok');};
+  recObj.onresult=function(e){
+    var inter='';
+    for(var i=e.resultIndex;i<e.results.length;i++){
+      if(e.results[i].isFinal)fin+=e.results[i][0].transcript;
+      else inter+=e.results[i][0].transcript;
+    }
+    var el=document.getElementById('ci'); el.value=fin+inter; resize(el);
+  };
+  recObj.onerror=function(e){
+    var m={'not-allowed':'麦克风权限被拒绝','no-speech':'未检测到语音','network':'网络错误','audio-capture':'未找到麦克风'};
+    toast(m[e.error]||'语音错误: '+e.error,'er'); isRec=false; btn.classList.remove('rec');
+  };
+  recObj.onend=function(){isRec=false;btn.classList.remove('rec');};
+  try{recObj.start();}catch(err){toast('启动失败: '+err.message,'er');}
+}
+
+// ════ PURE VOICE CHAT (hands-free loop) ════
+var vcSt='idle';       // idle | listening | thinking | speaking
+var vcRec=null;
+var vcVAD=null;        // ★ VAD: background mic monitor while AI speaking
+var vcOn=false;        // true = hands-free loop active
+var vcMode='1v1';      // '1v1' | 'disc'
+var vcHist=[];         // mirrors chatHist for voice session
+
+function openVC() {
+  vcMode='1v1';
+  var model=sel1v1;
+  var info=MI[model];
+  document.getElementById('vco').classList.add('open');
+  var av=document.getElementById('vcAv');
+  av.textContent=info.emoji; av.style.color=info.color; av.style.borderColor=info.color+'66';
+  var tag=document.getElementById('vcMTag');
+  tag.textContent=info.name; tag.style.background=info.color+'22'; tag.style.color=info.color;
+  tag.style.border='1px solid '+info.color+'44';
+  vcHist=[].concat(chatHist);
+  document.getElementById('vcTr').innerHTML='<div class="vcem">按一次麦克风 · 之后全程自动循环 🎙</div>';
+  vcOn=false; vcSt='idle'; setVcSt('idle');
+  bnVoiceOn(true);
+}
+
+// 讨论模式的语音入口：用户说话 → 识别出话题 → 作为讨论继续的输入触发下一轮
+function openDiscVC() {
+  vcMode='disc';
+  // 用嘉宾颜色作为 avatar
+  var ginfo=MI[dGuest]||{name:'讨论',color:'#00d4aa',emoji:'⬡'};
+  document.getElementById('vco').classList.add('open');
+  var av=document.getElementById('vcAv');
+  av.textContent=ginfo.emoji; av.style.color=ginfo.color; av.style.borderColor=ginfo.color+'66';
+  var tag=document.getElementById('vcMTag');
+  tag.textContent='多AI讨论'; tag.style.background=ginfo.color+'22'; tag.style.color=ginfo.color;
+  tag.style.border='1px solid '+ginfo.color+'44';
+  vcHist=[];
+  document.getElementById('vcTr').innerHTML='<div class="vcem">按麦克风说出你的观点 · AI 讨论后自动朗读结果 🎙</div>';
+  vcOn=false; vcSt='idle'; setVcSt('idle');
+  bnVoiceOn(true);
+}
+
+function exitVC() {
+  vcOn=false;
+  stopVAD();
+  if(vcRec){try{vcRec.stop();}catch(e){}vcRec=null;}
+  if(window.speechSynthesis)window.speechSynthesis.cancel();
+  vcSt='idle';
+  document.getElementById('vco').classList.remove('open');
+  if(vcMode==='1v1'){chatHist=vcHist; updTurnCnt(); syncVcToChat();}
+  bnVoiceOn(false);
+}
+
+function syncVcToChat() {
+  var hasNew=false;
+  vcHist.forEach(function(h){
+    if(h.addedUI)return; h.addedUI=true; hasNew=true;
+    if(h.role==='user')addUserBub(h.content);
+    else addAIBub(h.model||sel1v1,h.content);
+  });
+  if(hasNew)document.getElementById('chatEmp').style.display='none';
+}
+
+function setVcSt(st) {
+  vcSt=st;
+  var av=document.getElementById('vcAv');
+  var mic=document.getElementById('vcMic');
+  var status=document.getElementById('vcSt');
+  var wave=document.getElementById('vcWv');
+  var hint=document.getElementById('vcHi');
+  av.classList.remove('ais','us');
+  mic.classList.remove('ls','at');
+  wave.classList.remove('act','user');
+  if(st==='idle'){
+    status.textContent=vcOn?'准备下一轮…':'按麦克风开始对话';
+    hint.textContent=vcOn?'稍后自动开始监听':'按一次开始，之后全程免手操作';
+  }else if(st==='listening'){
+    av.classList.add('us'); mic.classList.add('ls');
+    wave.classList.add('act','user');
+    status.textContent='🎙 正在聆听…';
+    hint.textContent='说完后自动发送 · 再按麦克风可停止';
+  }else if(st==='thinking'){
+    status.textContent='AI 思考中…'; hint.textContent='请稍候…';
+    mic.classList.add('at');
+  }else if(st==='speaking'){
+    av.classList.add('ais'); mic.classList.add('at');
+    wave.classList.add('act');
+    status.textContent='AI 正在回答…';
+    hint.textContent='开口说话即可打断 · 说完后自动监听';
+  }
+}
+
+// 唯一按钮：首次按启动循环，后续按 = 打断/停止当前轮
+function vcToggle() {
+  if(vcSt==='thinking')return;
+  if(vcSt==='speaking'){
+    if(window.speechSynthesis)window.speechSynthesis.cancel();
+    vcOn=true; vcListen(); return;
+  }
+  if(vcSt==='listening'){
+    if(vcRec){try{vcRec.stop();}catch(e){}} return;
+  }
+  // idle → 启动
+  vcOn=true; vcListen();
+}
+
+function vcListen() {
+  if(!vcOn)return;
+  var SR=window.SpeechRecognition||window.webkitSpeechRecognition;
+  if(!SR){toast('请使用 Chrome/Edge','er');vcOn=false;setVcSt('idle');return;}
+  var ok=location.protocol==='https:'||location.protocol==='file:'||location.hostname==='localhost'||location.hostname==='127.0.0.1';
+  if(!ok){toast('语音识别需要 HTTPS','er');vcOn=false;setVcSt('idle');return;}
+  if(vcRec){try{vcRec.stop();}catch(e){}}
+  vcRec=new SR();
+  vcRec.lang='zh-CN'; vcRec.continuous=false; vcRec.interimResults=true; vcRec.maxAlternatives=1;
+  var fin=''; var iDiv=null;
+  vcRec.onstart=function(){setVcSt('listening');fin='';iDiv=vcAddLine('user','…');};
+  vcRec.onresult=function(e){
+    var inter=''; fin='';
+    for(var i=0;i<e.results.length;i++){
+      if(e.results[i].isFinal)fin+=e.results[i][0].transcript;
+      else inter+=e.results[i][0].transcript;
+    }
+    if(iDiv)iDiv.querySelector('.vclt').innerHTML=esc(fin+inter)||'…';
+  };
+  vcRec.onerror=function(e){
+    if(e.error==='no-speech'){
+      if(iDiv)iDiv.remove(); vcRec=null; setVcSt('idle');
+      if(vcOn)setTimeout(vcListen,500); return;
+    }
+    if(e.error==='aborted'){vcRec=null;return;}
+    var m={'not-allowed':'麦克风权限被拒绝，请在浏览器设置中允许','network':'网络错误','audio-capture':'未找到麦克风'};
+    toast(m[e.error]||'语音错误: '+e.error,'er');
+    if(iDiv)iDiv.remove(); vcOn=false; vcRec=null; setVcSt('idle');
+  };
+  vcRec.onend=function(){
+    vcRec=null;
+    var text=fin.trim();
+    if(!text){
+      if(iDiv)iDiv.remove(); setVcSt('idle');
+      if(vcOn)setTimeout(vcListen,500); return;
+    }
+    if(iDiv)iDiv.querySelector('.vclt').innerHTML=esc(text);
+    vcSend(text);
+  };
+  try{vcRec.start();}catch(err){toast('启动语音失败: '+err.message,'er');vcOn=false;setVcSt('idle');}
+}
+
+function vcSend(text) {
+  setVcSt('thinking');
+  if(vcMode==='disc'){
+    // 讨论模式：用语音输入驱动下一轮讨论
+    vcAddLine('user', text);
+    // 把用户语音内容作为补充话题写入日志，然后继续讨论
+    dLog.push({role:'user_voice',model:'user',action:'语音输入',content:text,round:dRnd});
+    // 让嘉宾直接对用户说的话做一个口头回应
+    var gmodel=dGuest||'gpt';
+    if(!cfg[gmodel]||!cfg[gmodel].key){toast('嘉宾模型未配置 API Key','er');vcOn=false;setVcSt('idle');return;}
+    var ctx=buildCtx();
+    var prompt='讨论话题:"'+dTopic+'"\n当前记录:\n'+ctx+'\n用户说:"'+text+'"\n请用2-3句口语化语言回应，适合语音播报。';
+    callM(gmodel,[{role:'user',content:prompt}],'你是'+MI[gmodel].name+'，本次嘉宾，用口语化方式简洁回应用户语音输入。')
+      .then(function(reply){
+        vcAddLine('ai',reply);
+        vcSpeak(reply);
+      })
+      .catch(function(err){
+        if(err.name!=='AbortError')toast('获取回复失败: '+err.message,'er');
+        setVcSt('idle'); if(vcOn)setTimeout(vcListen,800);
+      });
+    return;
+  }
+  // 1v1 模式
+  var model=sel1v1;
+  if(!cfg[model]||!cfg[model].key){toast(MI[model].name+' 未配置 API Key','er');vcOn=false;setVcSt('idle');return;}
+  vcHist.push({role:'user',content:text,addedUI:true});
+  var msgs=vcHist.slice(-14).map(function(h){return {role:h.role,content:h.content};});
+  callM(model, msgs)
+    .then(function(reply){
+      vcHist.push({role:'assistant',content:reply,model:model,addedUI:true});
+      vcAddLine('ai',reply);
+      vcSpeak(reply);
+    })
+    .catch(function(err){
+      if(err.name!=='AbortError')toast('获取回复失败: '+err.message,'er');
+      setVcSt('idle'); if(vcOn)setTimeout(vcListen,800);
+    });
+}
+
+function vcSpeak(text) {
+  if(!window.speechSynthesis){setVcSt('idle');if(vcOn)setTimeout(vcListen,300);return;}
+  window.speechSynthesis.cancel();
+  stopVAD(); // 停止上一轮VAD
+  setVcSt('speaking');
+  var lang = detectLang(text);
+  function doSpeak(){
+    var utt=new SpeechSynthesisUtterance(text);
+    utt.lang=lang; utt.rate=1.0; utt.pitch=1.0;
+    var voice = findVoice(lang);
+    if(voice)utt.voice=voice;
+    utt.onstart=function(){
+      // ★ AI开始说话后，启动 VAD 后台监听
+      if(vcOn)startVAD();
+    };
+    utt.onend=function(){
+      stopVAD();
+      // AI说完 → 自动开始监听
+      if(vcOn&&vcSt==='speaking')setTimeout(vcListen,400);
+    };
+    utt.onerror=function(e){
+      stopVAD();
+      if(e.error!=='interrupted'){setVcSt('idle');if(vcOn)setTimeout(vcListen,500);}
+    };
+    window.speechSynthesis.speak(utt);
+  }
+  if(window.speechSynthesis.getVoices().length>0){doSpeak();}
+  else{
+    window.speechSynthesis.addEventListener('voiceschanged',function once(){
+      window.speechSynthesis.removeEventListener('voiceschanged',once); doSpeak();
+    });
+    setTimeout(doSpeak,400);
+  }
+}
+
+// ★ VAD — AI 说话时在后台监听用户，一旦检测到语音立刻打断
+function startVAD(){
+  var SR=window.SpeechRecognition||window.webkitSpeechRecognition;
+  if(!SR||vcVAD)return; // 不支持或已在运行
+  try{
+    vcVAD=new SR();
+    vcVAD.lang='zh-CN';
+    vcVAD.continuous=false;
+    vcVAD.interimResults=true;
+    vcVAD.maxAlternatives=1;
+    var captured='';
+    vcVAD.onresult=function(e){
+      // 用户开口了 → 立刻打断AI
+      var txt='';
+      for(var i=0;i<e.results.length;i++)txt+=e.results[i][0].transcript;
+      captured=txt.trim();
+      if(captured&&vcSt==='speaking'){
+        // 打断TTS
+        if(window.speechSynthesis)window.speechSynthesis.cancel();
+        stopVAD();
+        // 短暂等待确保TTS已停，然后处理捕获的文字
+        setTimeout(function(){
+          if(captured){
+            // 已经有识别文字 → 直接用这段文字
+            var iDiv=vcAddLine('user',captured);
+            vcSend(captured);
+          }else{
+            // 没文字 → 重新监听
+            vcListen();
+          }
+        },150);
+      }
+    };
+    vcVAD.onerror=function(e){
+      vcVAD=null;
+      // VAD 失败是正常的，不提示
+    };
+    vcVAD.onend=function(){
+      vcVAD=null;
+      // 如果还在 speaking 状态且 vcOn，重启 VAD
+      if(vcOn&&vcSt==='speaking')setTimeout(startVAD,200);
+    };
+    vcVAD.start();
+  }catch(err){vcVAD=null;}
+}
+
+function stopVAD(){
+  if(vcVAD){try{vcVAD.stop();}catch(e){}vcVAD=null;}
+}
+
+function vcAddLine(role, text) {
+  var tr=document.getElementById('vcTr');
+  var em=tr.querySelector('.vcem'); if(em)em.remove();
+  var d=document.createElement('div'); d.className='vcl '+role;
+  var aiName;
+  if(vcMode==='disc'){aiName=MI[dGuest]?MI[dGuest].name:'嘉宾';}
+  else{aiName=MI[sel1v1]?MI[sel1v1].name:'AI';}
+  var lbl=role==='ai'?aiName:'你';
+  d.innerHTML='<div class="vcll">'+lbl+'</div><div class="vclt">'+esc(text)+'</div>';
+  tr.appendChild(d); tr.scrollTop=tr.scrollHeight; return d;
+}
+
+// ════ DISCUSSION ════
+function startDisc() {
+  var topic=document.getElementById('topicInp').value.trim();
+  if(!topic){toast('请输入讨论话题','er');return;}
+  var ms=Object.keys(selMulti).filter(function(k){return selMulti[k];});
+  if(ms.length<2){toast('至少2个模型','er');return;}
+  if(!cfg.gpt.key){toast('GPT 主持人需配置 API Key','er');return;}
+  var nonGpt=ms.filter(function(m){return m!=='gpt'&&cfg[m].key;});
+  if(!nonGpt.length){toast('至少一个非主持人模型需配置 API Key','er');return;}
+  dTopic=topic; dStop=false; dRun=true; dAuto=runMode==='auto';
+  dRnd=0; dTrn=0; dLog=[]; dCons=0; dHigh=0; finalRpt='';
+  showSc('disc');
+  document.getElementById('guestTp').textContent=topic;
+  document.getElementById('hbadge').textContent='多AI讨论';
+  document.getElementById('hbadge').className='hbadge tl';
+  setCtrl(true); abCtrl=new AbortController();
+  addHostMsg('🔍 识别话题类型并指定嘉宾中…');
+  assignGuest(topic, nonGpt).then(function(g){
+    dGuest=g;
+    dRevs=ms.filter(function(m){return m!=='gpt'&&m!==g&&cfg[m].key;});
+    updGuestBar(); rmLastHost();
+    addHostMsg('📢 话题：「'+topic+'」\n🎤 嘉宾：'+MI[dGuest].name+'\n👥 评议：'+(dRevs.map(function(m){return MI[m].name;}).join('、')||'无'));
+    return sleep(300);
+  }).then(function(){return runRnd();})
+  .catch(function(err){
+    if(err.name!=='AbortError'){addHostMsg('❌ '+err.message);toast(err.message,'er');}
+    setCtrl(false); dRun=false;
+  });
+}
+
+function assignGuest(topic, cands) {
+  var list=cands.map(function(m){return m+'('+MI[m].name+':'+MI[m].role+')';}).join('、');
+  var p='话题:"'+topic+'",候选:'+list+'。只返回最合适的AI的key('+cands.join('/')+'），不要其他文字。';
+  return callM('gpt',[{role:'user',content:p}]).then(function(raw){
+    var k=raw.trim().toLowerCase().replace(/[^a-z]/g,'');
+    if(cands.indexOf(k)>=0)return k;
+    return ruleFallback(topic,cands);
+  }).catch(function(){return ruleFallback(topic,cands);});
+}
+function ruleFallback(t,cands) {
+  var tl=t.toLowerCase();
+  if(/代码|编程|推理|架构/.test(tl)&&cands.indexOf('opus')>=0)return 'opus';
+  if(/中文|中国|汉字/.test(tl)&&cands.indexOf('deepseek')>=0)return 'deepseek';
+  if(/文档|图像|多模态/.test(tl)&&cands.indexOf('gemini')>=0)return 'gemini';
+  return cands[0];
+}
+
+function runRnd(isFollowUp) {
+  if(!isFollowUp)isFollowUp=false;
+  dRnd++; updRndUI();
+  addRndHdr(dRnd);
+  return runGuestTurn(isFollowUp).then(function(){
+    if(dStop)return;
+    return runRevsTurn();
+  }).then(function(){
+    if(dStop)return;
+    updStats();
+    if(dRnd%3===0){return genReport(false);}
+  }).then(function(){
+    if(dStop)return;
+    if(dAuto){return sleep(600).then(function(){if(!dStop)return runRnd(true);});}
+    else{setCtrl(false);if(!dAuto)addHostMsg('⏸ 本轮结束，请选择下一步。');}
+  });
+}
+
+function runRevsTurn() {
+  if(!dRevs.length)return Promise.resolve();
+  var chain=Promise.resolve();
+  dRevs.forEach(function(r){
+    chain=chain.then(function(){
+      if(dStop)return;
+      return runReviewerTurn(r).then(function(){dTrn++;updRpDots();});
+    });
+  });
+  return chain;
+}
+
+function runGuestTurn(isFollowUp) {
+  var tid=addDiscThink(dGuest,true);
+  var ctx=buildCtx();
+  var prompt=!isFollowUp
+    ?'讨论话题:"'+dTopic+'"\n\n请作为首席嘉宾给出首发观点：\n1.问题定义\n2.核心框架\n3.初步立场\n4.建议讨论路径'
+    :'讨论话题:"'+dTopic+'"\n\n讨论记录：\n'+ctx+'\n\n请回应评议观点：回应有效反对，说明采纳的修正，维护未被驳倒的立场。';
+  var sys='你是'+MI[dGuest].name+'，本次首席嘉宾，专长：'+MI[dGuest].role+'。';
+  return callM(dGuest,[{role:'user',content:prompt}],sys).then(function(r){
+    rmEl(tid); addDiscGuestMsg(dGuest,r,isFollowUp);
+    dLog.push({role:'guest',model:dGuest,action:isFollowUp?'回应':'首发',content:r,round:dRnd});
+  }).catch(function(err){
+    rmEl(tid); if(err.name!=='AbortError')addHostMsg('⚠ 嘉宾失败：'+err.message); throw err;
+  });
+}
+
+function runReviewerTurn(rev) {
+  var tid=addDiscThink(rev,false);
+  var ctx=buildCtx();
+  var prompt='讨论话题:"'+dTopic+'"\n\n记录：\n'+ctx+'\n\n请对嘉宾'+MI[dGuest].name+'的观点评议。\n只能选4种之一：\n[补充] 对某论点补充\n[质疑] 对某论点质疑\n[反对] 明确反对某论点\n[修正] 指出并修正错误\n\n发言必须以操作类型开头，针对嘉宾具体论点。';
+  var sys='你是'+MI[rev].name+'，评议AI，专长：'+MI[rev].role+'。必须围绕嘉宾观点，不可独立发挥。';
+  return callM(rev,[{role:'user',content:prompt}],sys).then(function(r){
+    rmEl(tid); var ac=parseAc(r); addDiscRevMsg(rev,r,ac);
+    dLog.push({role:'reviewer',model:rev,action:ac,content:r,round:dRnd});
+  }).catch(function(err){
+    rmEl(tid); if(err.name!=='AbortError')addHostMsg('⚠ 评议失败：'+err.message); throw err;
+  });
+}
+
+function parseAc(text) {
+  var t=text.trim();
+  if(/^\[补充\]/.test(t))return 's';
+  if(/^\[质疑\]/.test(t))return 'c';
+  if(/^\[反对\]/.test(t))return 'o';
+  if(/^\[修正\]/.test(t))return 'r';
+  if(/反对|不同意/.test(t.slice(0,60)))return 'o';
+  if(/修正|错误/.test(t.slice(0,60)))return 'r';
+  if(/质疑|为何/.test(t.slice(0,60)))return 'c';
+  return 's';
+}
+function buildCtx() {
+  return dLog.map(function(e){
+    var n=MI[e.model]?MI[e.model].name:e.model;
+    var r=e.role==='guest'?'嘉宾'+n+'('+e.action+')':'评议'+n+'('+e.action+')';
+    return '【第'+e.round+'轮·'+r+'】\n'+e.content;
+  }).join('\n\n---\n\n');
+}
+
+function genReport(isManual) {
+  var tid=addRptThink();
+  var ctx=buildCtx();
+  var p='讨论记录('+dRnd+'轮)：\n\n'+ctx+'\n\n生成阶段报告，只输出JSON：\n{"currentTopic":"","consensus":[],"divergence":[],"newPoints":[],"corrections":[{"ai":"","round":1,"point":""}],"recommendation":"","consensusPercent":75}';
+  return callM('gpt',[{role:'user',content:p}],'你是主持人GPT，生成客观报告，只输出JSON。').then(function(raw){
+    rmEl(tid);
+    var data;
+    try{data=JSON.parse(raw.replace(/```json|```/g,'').trim());}
+    catch(e){data={currentTopic:dTopic,consensus:['（解析失败）'],divergence:[],newPoints:[],corrections:[],recommendation:raw.slice(0,200),consensusPercent:dCons};}
+    dCons=Math.min(100,Math.max(0,data.consensusPercent||50));
+    addStageRpt(data,dRnd,isManual); updStats();
+    if(dAuto){
+      if(dCons>=85){dHigh++;if(dHigh>=2){addConvAlert(dCons);dStop=true;return endDisc();}}
+      else dHigh=0;
+    }
+  }).catch(function(err){rmEl(tid);if(err.name!=='AbortError')addHostMsg('⚠ 报告失败：'+err.message);});
+}
+
+function reqReport() { if(!dRun)return; var b=document.getElementById('ctRpt'); b.disabled=true; genReport(true).finally(function(){b.disabled=false;}); }
+function contDisc() { setCtrl(true); runRnd(true).catch(function(err){if(err.name!=='AbortError')toast(err.message,'er');setCtrl(false);}); }
+function togAuto() {
+  dAuto=!dAuto;
+  var btn=document.getElementById('ctAuto');
+  btn.classList.toggle('aon',dAuto);
+  btn.querySelector('span:last-child').textContent=dAuto?'停止自动':'自动';
+  document.getElementById('stMod').textContent=dAuto?'自动':'手动';
+  toast(dAuto?'已开启自动收敛':'已切换手动控制','ok');
+  if(dAuto&&dRun)contDisc();
+}
+
+function endDisc() {
+  dStop=true; setCtrl(true);
+  var tid=addDiscThink(dGuest,true);
+  var ctx=buildCtx();
+  var p='话题："'+dTopic+'"\n\n讨论记录：\n'+ctx+'\n\n请输出最终总结（每项必填）：\n\n1. 本轮主问题：\n\n2. 我的初始立场：\n\n3. 收到的关键反对（来自哪个AI、第几轮）：\n\n4. 我采纳的修正：\n\n5. 当前共识：\n\n6. 保留分歧：\n\n7. 是否建议继续讨论：';
+  callM(dGuest,[{role:'user',content:p}],'你是'+MI[dGuest].name+'，嘉宾，整合所有反馈输出最终总结，必须吸收修正，不可仅复述初始立场。').then(function(reply){
+    rmEl(tid); finalRpt=reply; showFinalSum(reply);
+  }).catch(function(err){
+    rmEl(tid); if(err.name!=='AbortError')toast('报告失败：'+err.message,'er');
+    setCtrl(false); dRun=false;
+  });
+}
+
+function showFinalSum(text) {
+  var parts=parseFinal(text);
+  var labels=['本轮主问题','初始立场','关键反对意见','采纳的修正','当前共识','保留分歧','是否建议继续'];
+  var icons=['🎯','📌','⚡','✅','🤝','❓','🔮'];
+  var html='';
+  for(var i=0;i<parts.length;i++){
+    html+='<div class="sumsec"><div class="suml"><div class="sumlnum">'+(i+1)+'</div><span>'+icons[i]+' '+labels[i]+'</span></div>'
+      +'<div class="sumc'+(i===0||i===4?' hi':'')+'">'+esc(parts[i])+'</div></div>';
+  }
+  document.getElementById('sumBody').innerHTML=html;
+  document.getElementById('sumMeta').textContent='嘉宾 '+MI[dGuest].name+' 整合 · '+dRnd+' 轮 · '+dLog.length+' 条发言';
+  showSc('summary'); dRun=false;
+}
+function parseFinal(text) {
+  var parts=text.split(/\n\d+\.\s*/);
+  var secs=[];
+  if(parts.length>1){for(var i=1;i<Math.min(parts.length,8);i++)secs.push(parts[i].replace(/^[^\n]*：?\n?/,'').trim()||'（未提供）');}
+  else secs.push(text);
+  while(secs.length<7)secs.push('（未提供）');
+  return secs.slice(0,7);
+}
+
+// DOM helpers - discussion
+var lastHost=null;
+function addHostMsg(text){
+  var c=document.getElementById('discMsgs');
+  var d=document.createElement('div'); d.className='hm';
+  d.innerHTML='<div class="hp">🎙</div><div class="hb">'+esc(text)+'</div>';
+  c.appendChild(d); lastHost=d; scrollC(c);
+}
+function rmLastHost(){if(lastHost){lastHost.remove();lastHost=null;}}
+function addRndHdr(n){
+  var c=document.getElementById('discMsgs');
+  var d=document.createElement('div'); d.className='rh';
+  d.innerHTML='<div class="rl"></div><div class="rp2">第 '+n+' 轮</div><div class="rl"></div>';
+  c.appendChild(d); scrollC(c);
+}
+function addDiscGuestMsg(model,text,followUp){
+  var c=document.getElementById('discMsgs');
+  var info=MI[model];
+  var d=document.createElement('div'); d.className='mg2';
+  d.innerHTML='<div class="ml" style="color:'+info.color+'"><span>● '+info.name+'</span>'
+    +'<span class="gcr">'+(followUp?'嘉宾·回应':'嘉宾·首发')+'</span></div>'
+    +'<div class="mb fm-'+model+'"><div class="bt">'+esc(text)+'</div></div>';
+  c.appendChild(d); scrollC(c);
+}
+var ACL={s:'补充',c:'质疑',o:'反对',r:'修正'};
+var ACC={s:'ab-s',c:'ab-c',o:'ab-o',r:'ab-r'};
+function addDiscRevMsg(model,text,ac){
+  var c=document.getElementById('discMsgs');
+  var info=MI[model];
+  var d=document.createElement('div'); d.className='mg2';
+  d.innerHTML='<div class="ml" style="color:'+info.color+'"><span>● '+info.name+'</span>'
+    +'<span class="ab '+(ACC[ac]||'ab-s')+'">'+(ACL[ac]||ac)+'</span></div>'
+    +'<div class="mb fm-'+model+'"><div class="bt">'+esc(text)+'</div></div>';
+  c.appendChild(d); scrollC(c);
+}
+var dThIdx=0;
+function addDiscThink(model,isGuest){
+  var c=document.getElementById('discMsgs');
+  var id='dt-'+(++dThIdx); var info=MI[model];
+  var lbl=isGuest?info.name+' 嘉宾思考中':info.name+' 评议中';
+  var d=document.createElement('div'); d.id=id; d.className='mg2';
+  d.innerHTML='<div class="ml" style="color:'+info.color+'">● '+lbl+'</div>'
+    +'<div class="mb fm-'+model+'" style="opacity:.6"><div class="td"><span></span><span></span><span></span></div></div>';
+  c.appendChild(d); scrollC(c); return id;
+}
+function addRptThink(){
+  var c=document.getElementById('discMsgs'); var id='dt-'+(++dThIdx);
+  var d=document.createElement('div'); d.id=id; d.className='mg2';
+  d.innerHTML='<div class="ml" style="color:var(--acb)">● 生成阶段报告中…</div>'
+    +'<div class="mb" style="background:rgba(108,92,231,.1);border-color:rgba(108,92,231,.2);opacity:.6">'
+    +'<div class="td" style="color:var(--acb)"><span></span><span></span><span></span></div></div>';
+  c.appendChild(d); scrollC(c); return id;
+}
+function addStageRpt(data,round,isManual){
+  var c=document.getElementById('discMsgs');
+  var pct=data.consensusPercent||0;
+  var ct=(data.consensus||[]).map(function(t){return '<span class="tag con">'+esc(t)+'</span>';}).join('')||'<span class="tag">暂无</span>';
+  var dt=(data.divergence||[]).map(function(t){return '<span class="tag dv">'+esc(t)+'</span>';}).join('')||'<span class="tag">暂无</span>';
+  var nt=(data.newPoints||[]).map(function(t){return '<span class="tag nw">'+esc(t)+'</span>';}).join('')||'<span class="tag">暂无</span>';
+  var cr=(data.corrections||[]).map(function(e){return '<div class="corri">✎ <b>'+esc(e.ai)+'</b>(第'+e.round+'轮)：'+esc(e.point)+'</div>';}).join('')||'<div class="corri" style="color:var(--txm)">暂无修正</div>';
+  var d=document.createElement('div'); d.className='rptc';
+  d.innerHTML='<div class="rpth" onclick="togRpt(this)">'
+    +'<div class="rpthl"><div class="rptiv">📋</div><div><div class="rptt">第'+round+'轮 阶段报告'+(isManual?'（手动）':'')+'</div><div class="rpts">'+(MI[dGuest]?MI[dGuest].name:dGuest)+' 主导 · 共识度 '+pct+'%</div></div></div>'
+    +'<span class="rpttg">展开 ▾</span></div>'
+    +'<div class="rptb">'
+    +'<div><div class="rsect">✅ 当前共识</div><div class="tags">'+ct+'</div></div>'
+    +'<div><div class="rsect">⚡ 当前分歧</div><div class="tags">'+dt+'</div></div>'
+    +'<div><div class="rsect">💡 新增观点</div><div class="tags">'+nt+'</div></div>'
+    +'<div><div class="rsect">✎ 修正记录</div><div class="corrl">'+cr+'</div></div>'
+    +'<div class="cbw"><div class="cbl"><span>共识度</span><span style="color:var(--acb);font-weight:600">'+pct+'%</span></div>'
+    +'<div class="cbt"><div class="cbf" style="width:'+pct+'%"></div></div></div>'
+    +'<div><div class="rsect">🔮 系统建议</div><div class="rptrec">'+esc(data.recommendation||'—')+'</div></div>'
+    +'</div>';
+  c.appendChild(d); scrollC(c);
+}
+function togRpt(hdr){
+  var body=hdr.nextElementSibling;
+  var col=body.classList.contains('col');
+  body.classList.toggle('col',!col);
+  hdr.querySelector('.rpttg').textContent=col?'收起 ▴':'展开 ▾';
+}
+function addConvAlert(pct){
+  var c=document.getElementById('discMsgs');
+  var d=document.createElement('div'); d.className='ca';
+  d.innerHTML='<span style="font-size:20px">✨</span>'
+    +'<div style="flex:1"><div style="font-family:IBM Plex Mono,monospace;font-size:12px;font-weight:600;color:var(--tl)">系统建议：可以结束讨论了</div>'
+    +'<div style="font-size:12px;color:var(--txd);margin-top:2px">共识度 '+pct+'%，连续两阶段无新增核心观点。</div></div>'
+    +'<button class="caeb" onclick="endDisc()">立即结束</button>';
+  c.appendChild(d); scrollC(c);
+}
+function updGuestBar(){
+  var info=MI[dGuest];
+  document.getElementById('guestNm').textContent=info?info.name:dGuest;
+  var av=document.getElementById('guestAv');
+  av.textContent=info?info.emoji:'?';
+  av.style.cssText='background:'+(info?info.color:'#fff')+'22;color:'+(info?info.color:'#fff')+';border:1px solid '+(info?info.color:'#fff')+'44;width:34px;height:34px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:700;font-family:Syne,sans-serif;flex-shrink:0';
+}
+function updRndUI(){document.getElementById('rndPill').textContent='第 '+dRnd+' 轮';}
+function updRpDots(){
+  var mod=dRnd%3; var fill=mod===0?3:mod;
+  for(var i=0;i<3;i++){
+    var d=document.getElementById('rp'+i);
+    if(!d)continue; d.className='rpdot'+(i<fill?' done':'');
+  }
+  document.getElementById('rpSub').textContent=mod===0?'✓ 报告已生成':'还需 '+(3-mod)+' 轮';
+}
+function updStats(){
+  document.getElementById('stRnd').textContent='第 '+dRnd+' 轮';
+  document.getElementById('stTrn').textContent=dTrn;
+  document.getElementById('stCon').textContent=dCons?dCons+'%':'—';
+  document.getElementById('stMod').textContent=dAuto?'自动':'手动';
+  document.getElementById('stConF').style.width=dCons+'%';
+}
+function setCtrl(dis){['ctCont','ctRpt','ctAuto','ctEnd'].forEach(function(id){var e=document.getElementById(id);if(e)e.disabled=dis;});}
+
+// ════ SCREEN ════
+function showSc(name){
+  document.getElementById('setupSc').style.display  = name==='setup'   ? '' : 'none';
+  document.getElementById('chatSc').style.display   = name==='chat'    ? 'flex' : 'none';
+  document.getElementById('discSc').style.display   = name==='disc'    ? 'flex' : 'none';
+  document.getElementById('sumSc').style.display    = name==='summary' ? '' : 'none';
+  document.getElementById('transSc').style.display  = name==='trans'   ? 'flex' : 'none';
+  document.getElementById('sideStatSec').style.display = name==='disc' ? 'block' : 'none';
+  document.getElementById('sideMdSec').style.display   = name==='disc' ? 'none'  : 'block';
+  if(name==='setup'){document.getElementById('hbadge').textContent='就绪';document.getElementById('hbadge').className='hbadge';}
+  bnSetActive(name);
+  updFab(name);
+}
+
+function backSetup(){
+  if(dRun){dStop=true;dRun=false;}
+  if(abCtrl){abCtrl.abort();abCtrl=null;}
+  if(window.speechSynthesis)window.speechSynthesis.cancel();
+  isProc=false; vcOn=false;
+  // cleanup translation
+  if(trRec){try{trRec.stop();}catch(e){}trRec=null;}
+  if(trMediaRec&&trMediaRec.state==='recording'){try{trMediaRec.stop();}catch(e){}}
+  trSt='idle';
+  showSc('setup'); buildSidebar();
+  // reset hbadge style
+  var hb=document.getElementById('hbadge');
+  hb.style.color=''; hb.style.borderColor='';
+}
+function copyRpt(){
+  if(!finalRpt)return;
+  navigator.clipboard.writeText(finalRpt).then(function(){toast('✓ 报告已复制','ok');}).catch(function(){toast('复制失败','er');});
+}
+
+// ════ BOTTOM NAV ════
+function fabVoiceClick(){
+  var cs=document.getElementById('chatSc');
+  var inChat=cs&&cs.style.display!=='none';
+  if(document.getElementById('vco').classList.contains('open')){
+    exitVC(); return;
+  }
+  if(inChat){ openVC(); }
+  else { toast('请先进入 1对1 对话模式','er'); }
+}
+function updFab(screen){
+  var fab=document.getElementById('fabVoice');
+  if(!fab)return;
+  if(screen==='chat'||screen==='disc'){
+    fab.style.display='flex';
+    fab.classList.remove('active-vc');
+    // 讨论界面：FAB 点击进入讨论语音模式
+    fab.onclick = screen==='disc' ? function(){
+      if(document.getElementById('vco').classList.contains('open')){exitVC();}
+      else{openDiscVC();}
+    } : fabVoiceClick;
+  } else {
+    fab.style.display='none';
+  }
+}
+
+function bnClick(tab){
+  if(tab==='home'){backSetup();}
+  else if(tab==='models'){showMobModels();}
+  else if(tab==='voice'){
+    if(document.getElementById('vco').classList.contains('open')){exitVC();}
+    else{
+      var cs=document.getElementById('chatSc');
+      if(cs&&cs.style.display!=='none'){openVC();}
+      else{toast('请先进入 1对1 对话模式','er');}
+    }
+  }
+}
+function bnVoiceOn(on){
+  var btn=document.getElementById('bn2');
+  var lab=document.getElementById('bn2lab');
+  if(btn)btn.classList.toggle('tla',on);
+  if(lab)lab.textContent=on?'语音·ON':'语音';
+  var fab=document.getElementById('fabVoice');
+  if(fab)fab.classList.toggle('active-vc',on);
+}
+function bnSetActive(screen){
+  var map={setup:'bn0',chat:'bn0',disc:'bn0',summary:'bn0'};
+  ['bn0','bn1','bn2','bn3'].forEach(function(id){var e=document.getElementById(id);if(e)e.classList.remove('act');});
+  var target=map[screen]; if(target){var e=document.getElementById(target);if(e)e.classList.add('act');}
+}
+
+function showMobModels(){
+  var ex=document.getElementById('mobMdSheet'); if(ex){ex.remove();return;}
+  var sheet=document.createElement('div');
+  sheet.id='mobMdSheet';
+  sheet.style.cssText='position:fixed;bottom:62px;left:0;right:0;z-index:140;background:rgba(18,18,38,.98);border-top:1px solid rgba(255,255,255,.15);padding:15px;max-height:70vh;overflow-y:auto;backdrop-filter:blur(20px)';
+  var html='<div style="font-family:IBM Plex Mono,monospace;font-size:11px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:rgba(255,255,255,.5);margin-bottom:11px">选择 AI 伙伴</div>';
+  MODELS.forEach(function(k){
+    var info=MI[k]; var sel=sel1v1===k;
+    html+='<div onclick="mobSelModel(\''+k+'\')" style="display:flex;align-items:center;gap:10px;padding:12px;border-radius:10px;margin-bottom:6px;border:1px solid '+(sel?info.color:'rgba(255,255,255,.12)')+';background:'+(sel?info.color+'22':'rgba(255,255,255,.08)')+';cursor:pointer">'
+      +'<div style="width:10px;height:10px;border-radius:50%;background:'+info.color+';box-shadow:0 0 8px '+info.color+';flex-shrink:0"></div>'
+      +'<div style="flex:1"><div style="font-size:13px;font-weight:600">'+info.name+'</div><div style="font-size:11px;color:rgba(255,255,255,.6);margin-top:1px">'+info.role+'</div></div>'
+      +(sel?'<span style="color:'+info.color+';font-size:16px">✓</span>':'')+'</div>';
+  });
+  html+='<button onclick="document.getElementById(\'mobMdSheet\').remove()" style="width:100%;margin-top:7px;padding:10px;border-radius:8px;border:1px solid rgba(255,255,255,.15);background:rgba(255,255,255,.07);color:rgba(255,255,255,.7);font-family:IBM Plex Mono,monospace;font-size:12px;cursor:pointer">关闭</button>';
+  sheet.innerHTML=html; document.body.appendChild(sheet);
+}
+function mobSelModel(k){
+  sel1v1=k;
+  var info=MI[k];
+  // update partner bar if in chat
+  var pav=document.getElementById('pav');
+  if(pav){pav.textContent=info.emoji;pav.style.cssText='background:'+info.color+'22;color:'+info.color+';border:1px solid '+info.color+'44;width:34px;height:34px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:700;font-family:Syne,sans-serif;flex-shrink:0';}
+  var pn=document.getElementById('pname');if(pn)pn.textContent=info.name;
+  var pr=document.getElementById('prole');if(pr)pr.textContent=info.role;
+  var ci=document.getElementById('ci');if(ci)ci.placeholder='和 '+info.name+' 说…';
+  buildSetupGrids(); buildSidebar();
+  toast('已切换到 '+info.name,'ok');
+  var s=document.getElementById('mobMdSheet');if(s)s.remove();
+}
+
+// ════ TRANSLATION MODE ════
+function startTrans() {
+  if (!cfg[selTrans].key) { toast(MI[selTrans].name+' 未配置 API Key','er'); return; }
+  if (srMode==='whisper' && !whisperCfg.key) { toast('Whisper 未配置 API Key，已切回浏览器识别','er'); srMode='browser'; }
+  trCount=0;
+  showSc('trans');
+  document.getElementById('hbadge').textContent='中泰互译';
+  document.getElementById('hbadge').className='hbadge';
+  document.getElementById('hbadge').style.color='var(--dg)';
+  document.getElementById('hbadge').style.borderColor='rgba(255,107,138,.3)';
+  document.getElementById('trEngine').textContent=MI[selTrans].name;
+  document.getElementById('trSrLabel').textContent=srMode==='whisper'?'Whisper API 语音识别':'浏览器语音识别';
+  trSt='idle';
+}
+
+function clearTrans() {
+  trCount=0;
+  document.getElementById('trMsgs').innerHTML='<div class="tr-emp" id="trEmp"><div class="emp-i">🇹🇭</div><div class="emp-t">中泰实时互译</div><div class="emp-s" style="font-family:IBM Plex Mono,monospace">输入文字或按麦克风说话<br>中文 → 泰语 · 泰语 → 中文</div></div>';
+  document.getElementById('trCnt').textContent='0 条翻译';
+  toast('已清空','ok');
+}
+
+function setTrSt(st) {
+  trSt = st;
+  var mic = document.getElementById('trMicBtn');
+  var hi = document.getElementById('trHint');
+  var sendBtn = document.getElementById('trSendBtn');
+  if(mic) mic.classList.remove('rec');
+  if (st==='idle') {
+    if(hi) hi.textContent='Enter 翻译 · Shift+Enter 换行 · 🎙 语音输入';
+    if(sendBtn) sendBtn.disabled=false;
+  } else if (st==='recording') {
+    if(mic) mic.classList.add('rec');
+    if(hi) hi.textContent='🎙 正在聆听… 再次点击结束';
+  } else if (st==='processing') {
+    if(hi) hi.textContent='AI 翻译中…';
+    if(sendBtn) sendBtn.disabled=true;
+  } else if (st==='speaking') {
+    if(hi) hi.textContent='播报中…';
+    if(sendBtn) sendBtn.disabled=false;
+  }
+}
+
+// ── Text input for translation ──
+function trOnKey(e) { if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();sendTrans();} }
+function trResize(el) { el.style.height='auto'; el.style.height=Math.min(el.scrollHeight,130)+'px'; }
+
+function sendTrans() {
+  if (trSt==='processing') return;
+  var inp = document.getElementById('trInput');
+  var text = inp.value.trim(); if (!text) return;
+  inp.value=''; trResize(inp);
+  // Stop any current TTS
+  if(window.speechSynthesis) window.speechSynthesis.cancel();
+  trProcess(text);
+}
+
+// ── Mic button on input bar ──
+function toggleTrMic() {
+  if (trSt==='processing') return;
+  if (trSt==='speaking') {
+    if (window.speechSynthesis) window.speechSynthesis.cancel();
+    setTrSt('idle'); return;
+  }
+  if (trSt==='recording') {
+    // Stop recording
+    if (srMode==='whisper') {
+      if (trMediaRec && trMediaRec.state==='recording') trMediaRec.stop();
+    } else {
+      if (trRec) { try{trRec.stop();}catch(e){} }
+    }
+    return;
+  }
+  // Start recording
+  if (srMode==='whisper') trListenWhisper();
+  else trListenBrowser();
+}
+
+// ── Browser SpeechRecognition for translation ──
+function trListenBrowser() {
+  var SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+  if (!SR) { toast('请使用 Chrome/Edge','er'); return; }
+  if (trRec) { try{trRec.stop();}catch(e){} }
+  trRec = new SR();
+  // 不指定lang，让浏览器自动识别中文和泰语
+  trRec.lang = 'zh-CN';
+  trRec.continuous = false;
+  trRec.interimResults = true;
+  trRec.maxAlternatives = 1;
+  var fin = '';
+  trRec.onstart = function() { setTrSt('recording'); fin=''; };
+  trRec.onresult = function(e) {
+    fin = '';
+    for (var i=0; i<e.results.length; i++) {
+      if (e.results[i].isFinal) fin += e.results[i][0].transcript;
+    }
+  };
+  trRec.onerror = function(e) {
+    var m={'not-allowed':'麦克风权限被拒绝','no-speech':'未检测到语音','network':'网络错误','audio-capture':'未找到麦克风'};
+    toast(m[e.error]||'语音错误: '+e.error,'er');
+    trRec=null; setTrSt('idle');
+  };
+  trRec.onend = function() {
+    trRec = null;
+    var text = fin.trim();
+    if (!text) { setTrSt('idle'); return; }
+    trProcess(text);
+  };
+  try { trRec.start(); } catch(err) { toast('启动失败: '+err.message,'er'); }
+}
+
+// ── Whisper API for translation ──
+function trListenWhisper() {
+  if (!whisperCfg.key) { toast('Whisper API Key 未配置','er'); return; }
+  navigator.mediaDevices.getUserMedia({audio:true}).then(function(stream) {
+    trAudioChunks = [];
+    trMediaRec = new MediaRecorder(stream, {mimeType: MediaRecorder.isTypeSupported('audio/webm;codecs=opus') ? 'audio/webm;codecs=opus' : 'audio/webm'});
+    trMediaRec.ondataavailable = function(e) { if(e.data.size>0) trAudioChunks.push(e.data); };
+    trMediaRec.onstop = function() {
+      stream.getTracks().forEach(function(t){t.stop();});
+      if (trAudioChunks.length===0) { setTrSt('idle'); return; }
+      var blob = new Blob(trAudioChunks, {type:'audio/webm'});
+      trWhisperTranscribe(blob);
+    };
+    trMediaRec.onerror = function(e) {
+      toast('录音失败','er');
+      stream.getTracks().forEach(function(t){t.stop();});
+      setTrSt('idle');
+    };
+    trMediaRec.start();
+    setTrSt('recording');
+  }).catch(function(err) {
+    toast('麦克风访问失败: '+err.message,'er');
+  });
+}
+
+function trWhisperTranscribe(blob) {
+  setTrSt('processing');
+  document.getElementById('trHint').textContent='Whisper 识别中…';
+  var url = whisperCfg.url.replace(/\/+$/,'') + '/audio/transcriptions';
+  var fd = new FormData();
+  fd.append('file', blob, 'audio.webm');
+  fd.append('model', whisperCfg.model || 'whisper-1');
+  // 不指定language让Whisper自动检测
+  fetch(url, {
+    method: 'POST',
+    headers: {'Authorization': 'Bearer ' + whisperCfg.key},
+    body: fd
+  }).then(function(res) {
+    if (!res.ok) return res.json().catch(function(){return {};}).then(function(e){throw new Error(e.error&&e.error.message?e.error.message:'Whisper HTTP '+res.status);});
+    return res.json();
+  }).then(function(data) {
+    var text = (data.text||'').trim();
+    if (!text) { toast('未识别到语音','er'); setTrSt('idle'); return; }
+    trProcess(text);
+  }).catch(function(err) {
+    toast('Whisper 识别失败: '+err.message,'er');
+    setTrSt('idle');
+  });
+}
+
+// ── Core translation process ──
+function trProcess(text) {
+  setTrSt('processing');
+  // Remove empty prompt element
+  var emp = document.getElementById('trEmp'); if(emp) emp.style.display='none';
+
+  // Detect source language
+  var lang = detectLang(text);
+  var isChinese = lang.indexOf('zh')===0 || lang==='en-US'; // treat English as "from Chinese side"
+  // If it contains significant Thai chars, it's Thai
+  var thCount=0, totalCount=0;
+  for(var i=0;i<text.length;i++){var c=text.charCodeAt(i);if(c>=0x0E00&&c<=0x0E7F){thCount++;totalCount++;}else if(c>0x20){totalCount++;}}
+  var isThai = totalCount>0 && (thCount/totalCount)>0.15;
+
+  var srcLang = isThai ? 'th' : 'zh';
+  var dstLang = isThai ? 'zh' : 'th';
+  var srcLabel = isThai ? 'ภาษาไทย' : '中文';
+  var dstLabel = isThai ? '中文' : 'ภาษาไทย';
+
+  // Show source text immediately
+  var container = document.getElementById('trMsgs');
+  var pair = document.createElement('div'); pair.className='tr-pair';
+  pair.innerHTML = '<div class="tr-lbl '+srcLang+'">'+srcLabel
+    +'<button class="tr-spk" onclick="tts(this.getAttribute(\'data-t\'))" data-t="'+escA(text)+'">'
+    +'<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">'
+    +'<polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M15.54 8.46a5 5 0 0 1 0 7.07"/></svg></button>'
+    +'</div>'
+    +'<div class="tr-src '+srcLang+'">'+esc(text)+'</div>'
+    +'<div class="tr-lbl '+dstLang+'" style="margin-top:8px">'+dstLabel+' · 翻译中…</div>'
+    +'<div class="tr-dst '+dstLang+'" id="trDstCur" style="opacity:.5">⋯</div>';
+  container.appendChild(pair);
+  scrollC(container);
+
+  // Call AI for translation
+  var sysPrompt, userPrompt;
+  if (isThai) {
+    sysPrompt = '你是专业中泰翻译。用户输入泰语，你只输出对应的中文翻译，不要解释，不要加任何其他文字。';
+    userPrompt = text;
+  } else {
+    sysPrompt = 'คุณเป็นนักแปลไทย-จีนมืออาชีพ ผู้ใช้ป้อนภาษาจีน คุณแปลเป็นภาษาไทยเท่านั้น ห้ามอธิบาย ห้ามเพิ่มข้อความอื่น\n你是专业中泰翻译。用户输入中文，你只输出对应的泰语翻译，不要解释，不要加任何其他文字。';
+    userPrompt = text;
+  }
+
+  callM(selTrans, [{role:'user',content:userPrompt}], sysPrompt)
+    .then(function(reply) {
+      reply = reply.trim();
+      var dst = document.getElementById('trDstCur');
+      if (dst) {
+        dst.id = '';
+        dst.style.opacity = '1';
+        dst.innerHTML = esc(reply)
+          +'<button class="tr-spk" onclick="tts(this.getAttribute(\'data-t\'))" data-t="'+escA(reply)+'">'
+          +'<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">'
+          +'<polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M15.54 8.46a5 5 0 0 1 0 7.07"/></svg></button>';
+      }
+      // Also update the label
+      var labels = pair.querySelectorAll('.tr-lbl');
+      if (labels.length>=2) labels[1].textContent = dstLabel;
+      scrollC(container);
+      // Update count
+      trCount++;
+      var cntEl=document.getElementById('trCnt'); if(cntEl) cntEl.textContent=trCount+' 条翻译';
+      // Auto-speak the translation
+      trSpeak(reply, dstLang);
+    })
+    .catch(function(err) {
+      var dst = document.getElementById('trDstCur');
+      if (dst) { dst.id=''; dst.style.opacity='1'; dst.textContent='翻译失败: '+err.message; dst.style.color='var(--dg)'; }
+      setTrSt('idle');
+    });
+}
+
+function trSpeak(text, lang) {
+  if (!window.speechSynthesis) { setTrSt('idle'); return; }
+  window.speechSynthesis.cancel();
+  setTrSt('speaking');
+  var ttsLang = lang==='th' ? 'th-TH' : 'zh-CN';
+  function doSpeak() {
+    var utt = new SpeechSynthesisUtterance(text);
+    utt.lang = ttsLang; utt.rate = 0.9; utt.pitch = 1.0;
+    var voice = findVoice(ttsLang);
+    if (voice) utt.voice = voice;
+    utt.onend = function() { setTrSt('idle'); };
+    utt.onerror = function(e) { if(e.error!=='interrupted') setTrSt('idle'); };
+    window.speechSynthesis.speak(utt);
+  }
+  if (window.speechSynthesis.getVoices().length>0) { doSpeak(); }
+  else {
+    window.speechSynthesis.addEventListener('voiceschanged', function once(){
+      window.speechSynthesis.removeEventListener('voiceschanged',once); doSpeak();
+    });
+    setTimeout(doSpeak, 400);
+  }
+}
+
+// ════ API ════
+function callM(model, messages, sysPrompt) {
+  var c=cfg[model];
+  if(!c.key)return Promise.reject(new Error((MI[model]?MI[model].name:model)+' 未配置 API Key'));
+  var url=c.url.replace(/\/+$/,'')+'/chat/completions';
+  var msgs=sysPrompt?[{role:'system',content:sysPrompt}].concat(messages):messages;
+  return fetch(url,{
+    method:'POST',
+    headers:{'Content-Type':'application/json','Authorization':'Bearer '+c.key},
+    body:JSON.stringify({model:c.model,messages:msgs,max_tokens:2000,stream:false}),
+    signal:abCtrl?abCtrl.signal:undefined
+  }).then(function(res){
+    if(!res.ok)return res.json().catch(function(){return {};}).then(function(e){throw new Error(e.error&&e.error.message?e.error.message:'HTTP '+res.status);});
+    return res.json();
+  }).then(function(data){
+    return (data.choices&&data.choices[0]&&data.choices[0].message&&data.choices[0].message.content)||'（无响应）';
+  });
+}
+
+// ════ CONFIG ════
+function buildCfgModal(){
+  var html='';
+  MODELS.forEach(function(k){
+    var info=MI[k];
+    html+='<div class="mdsec"><div class="mdst">'+info.name+'</div><div class="fg">'
+      +'<div class="fl">API Key</div><input class="mi" type="password" id="ci-'+k+'-k" placeholder="sk-..." value="'+escA(cfg[k].key)+'">'
+      +'<div class="fl">API 地址</div><input class="mi" type="text" id="ci-'+k+'-u" value="'+escA(cfg[k].url)+'">'
+      +'<div class="fl">模型名称</div><input class="mi" type="text" id="ci-'+k+'-m" value="'+escA(cfg[k].model)+'">'
+      +'</div></div>';
+  });
+  // Whisper config
+  html+='<div class="mdsec" style="border-top:1px solid var(--bd);padding-top:14px;margin-top:8px"><div class="mdst" style="color:var(--dg)">🎧 Whisper 语音识别（中泰互译可选）</div><div class="fg">'
+    +'<div class="fl">API Key</div><input class="mi" type="password" id="ci-wh-k" placeholder="sk-..." value="'+escA(whisperCfg.key)+'">'
+    +'<div class="fl">API 地址</div><input class="mi" type="text" id="ci-wh-u" value="'+escA(whisperCfg.url)+'">'
+    +'<div class="fl">模型名称</div><input class="mi" type="text" id="ci-wh-m" value="'+escA(whisperCfg.model)+'">'
+    +'</div></div>';
+  document.getElementById('cfgBody').innerHTML=html;
+}
+function openCfg(){buildCfgModal();document.getElementById('cfgMo').classList.add('open');}
+function closeCfg(){document.getElementById('cfgMo').classList.remove('open');}
+function saveCfg(){
+  MODELS.forEach(function(k){
+    cfg[k].key  =(document.getElementById('ci-'+k+'-k')||{}).value||'';
+    cfg[k].url  =(document.getElementById('ci-'+k+'-u')||{}).value||'';
+    cfg[k].model=(document.getElementById('ci-'+k+'-m')||{}).value||'';
+    cfg[k].key=cfg[k].key.trim(); cfg[k].url=cfg[k].url.trim(); cfg[k].model=cfg[k].model.trim();
+  });
+  // Whisper
+  whisperCfg.key  =((document.getElementById('ci-wh-k')||{}).value||'').trim();
+  whisperCfg.url  =((document.getElementById('ci-wh-u')||{}).value||'').trim();
+  whisperCfg.model=((document.getElementById('ci-wh-m')||{}).value||'').trim();
+  saveCfgLS(); closeCfg(); toast('✓ 配置已保存','ok');
+}
+function loadCfg(){try{var s=localStorage.getItem('cvo2_cfg');if(s){var p=JSON.parse(s);MODELS.forEach(function(k){if(p[k])Object.assign(cfg[k],p[k]);});if(p._whisper)Object.assign(whisperCfg,p._whisper);}}catch(e){}}
+function saveCfgLS(){try{var d=JSON.parse(JSON.stringify(cfg));d._whisper=whisperCfg;localStorage.setItem('cvo2_cfg',JSON.stringify(d));}catch(e){}}
+
+// ════ UTILS ════
+function rmEl(id){var e=document.getElementById(id);if(e)e.remove();}
+function scrollC(c){requestAnimationFrame(function(){if(c)c.scrollTop=c.scrollHeight;});}
+function sleep(ms){return new Promise(function(r){setTimeout(r,ms);});}
+function esc(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/\n/g,'<br>');}
+function escA(s){return String(s||'').replace(/"/g,'&quot;').replace(/'/g,'&#39;').replace(/\n/g,' ');}
+function toast(msg,type){
+  var c=document.getElementById('tc');
+  var el=document.createElement('div'); el.className='tos'+(type?' '+type:''); el.textContent=msg;
+  c.appendChild(el); setTimeout(function(){el.remove();},3500);
+}
+</script>
+</body>
+</html>
